@@ -1,792 +1,1713 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LifeOS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
-    --surface3: #22222f;
-    --border: #2a2a3a;
-    --border2: #3a3a50;
-    --accent: #7c6aff;
-    --accent2: #ff6a9e;
-    --accent3: #6affb8;
-    --accent4: #ffb86a;
-    --text: #e8e8f0;
-    --text2: #9090a8;
-    --text3: #606078;
-    --danger: #ff4466;
-    --success: #44ff88;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
-  
-  /* SCROLLBAR */
-  ::-webkit-scrollbar{width:4px;height:4px}
-  ::-webkit-scrollbar-track{background:var(--surface)}
-  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-  
-  /* LAYOUT */
-  .app{display:flex;flex-direction:column;height:100vh}
-  
-  /* HEADER */
-  .header{display:flex;align-items:center;gap:24px;padding:0 24px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:100}
-  .logo{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:4px;color:var(--accent);text-transform:uppercase}
-  .logo span{color:var(--accent2)}
-  .date-badge{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:4px}
-  
-  /* NAV TABS */
-  .nav{display:flex;gap:2px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
-  .nav-tab{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 16px;border:none;background:none;color:var(--text3);cursor:pointer;position:relative;transition:color 0.2s;white-space:nowrap}
-  .nav-tab:hover{color:var(--text2)}
-  .nav-tab.active{color:var(--accent)}
-  .nav-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent)}
-  .nav-tab:nth-child(2).active{color:var(--accent2)}
-  .nav-tab:nth-child(2).active::after{background:var(--accent2)}
-  .nav-tab:nth-child(3).active{color:var(--accent3)}
-  .nav-tab:nth-child(3).active::after{background:var(--accent3)}
-  .nav-tab:nth-child(4).active{color:var(--accent4)}
-  .nav-tab:nth-child(4).active::after{background:var(--accent4)}
-  .nav-tab:nth-child(5).active{color:var(--accent)}
-  
-  /* CONTENT */
-  .content{flex:1;overflow:hidden;display:flex;flex-direction:column}
-  .tab-panel{display:none;flex:1;overflow:auto;padding:20px 24px}
-  .tab-panel.active{display:flex;flex-direction:column;gap:16px}
-  
-  /* BUTTONS */
-  .btn{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;border-radius:4px;transition:all 0.15s}
-  .btn:hover{border-color:var(--accent);color:var(--accent)}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn.primary:hover{background:#6a58e8;border-color:#6a58e8;color:#fff}
-  .btn.danger{border-color:var(--danger);color:var(--danger)}
-  .btn.danger:hover{background:var(--danger);color:#fff}
-  .btn.small{padding:3px 8px;font-size:10px}
-  .btn.success{border-color:var(--success);color:var(--success)}
-  .btn.pink{border-color:var(--accent2);color:var(--accent2)}
-  .btn.pink:hover{background:var(--accent2);color:#fff}
-  
-  /* INPUTS */
-  input,textarea,select{font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:6px 10px;outline:none;transition:border-color 0.15s}
-  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
-  select option{background:var(--surface2)}
-  
-  /* MODAL */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-  .modal{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:24px;min-width:360px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
-  .modal h3{font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;font-family:var(--mono)}
-  .modal-row{display:flex;gap:8px;margin-bottom:10px;flex-direction:column}
-  .modal-row label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)}
-  .modal-row input,.modal-row select,.modal-row textarea{width:100%}
-  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-  
-  /* SECTION HEADER */
-  .section-header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-  .section-title{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text3)}
-  .pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:12px;border:1px solid}
-  
-  /* ==================== TAB 1: CALENDAR ==================== */
-  .cal-header{display:flex;align-items:center;gap:12px}
-  .cal-header h2{font-size:20px;font-weight:800;font-family:var(--sans)}
-  .cal-nav{display:flex;align-items:center;gap:8px;margin-left:auto}
-  .cal-body{display:grid;grid-template-columns:80px 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:1;min-height:0}
-  .cal-time-col{background:var(--surface);border-right:1px solid var(--border)}
-  .cal-time-slot{height:48px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-family:var(--mono);font-size:10px;color:var(--text3);border-bottom:1px solid var(--border)}
-  .cal-events-col{position:relative;overflow-y:auto;background:var(--surface)}
-  .cal-event-row{height:48px;border-bottom:1px solid var(--border);position:relative;cursor:pointer;transition:background 0.1s}
-  .cal-event-row:hover{background:var(--surface2)}
-  .cal-event{position:absolute;left:4px;right:4px;border-radius:4px;padding:2px 6px;font-size:11px;font-family:var(--mono);cursor:pointer;z-index:10;overflow:hidden;display:flex;align-items:center;justify-content:space-between}
-  .cal-event .del-btn{opacity:0;font-size:9px;background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;padding:0 2px}
-  .cal-event:hover .del-btn{opacity:1}
-  .cal-now-line{position:absolute;left:0;right:0;height:2px;background:var(--accent2);z-index:20;pointer-events:none}
-  .cal-now-line::before{content:'';position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--accent2)}
-  .cal-week-grid{display:grid;grid-template-columns:80px repeat(7,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:1;min-height:0;gap:0}
-  .cal-week-day-header{background:var(--surface2);padding:8px;text-align:center;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:11px;font-family:var(--mono);color:var(--text3)}
-  .cal-week-day-header.today{color:var(--accent)}
-  .cal-mode-toggle{display:flex;gap:4px}
-  .cal-mode-btn{font-family:var(--mono);font-size:10px;padding:4px 10px;border:1px solid var(--border);background:none;color:var(--text3);cursor:pointer;border-radius:3px}
-  .cal-mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
-  
-  /* ==================== TAB 2: TODO ==================== */
-  .months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-  .month-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden}
-  .month-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2)}
-  .month-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
-  .month-card h3{font-size:14px;font-weight:800;margin-bottom:4px}
-  .month-card span{font-family:var(--mono);font-size:10px;color:var(--text3)}
-  .todo-sheet{overflow-x:auto;flex:1}
-  .todo-table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:11px;min-width:900px}
-  .todo-table th{background:var(--surface2);color:var(--text3);padding:8px 10px;text-transform:uppercase;letter-spacing:1px;border:1px solid var(--border);position:sticky;top:0;z-index:5;font-size:10px}
-  .todo-table td{border:1px solid var(--border);padding:4px 6px;vertical-align:top;background:var(--surface)}
-  .todo-table tr:hover td{background:var(--surface2)}
-  .todo-cell-input{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:11px;resize:none;min-height:24px;outline:none;line-height:1.4}
-  .todo-day-label{color:var(--text3);font-size:10px;margin-bottom:2px}
-  .goal-row td{background:rgba(124,106,255,0.08)!important}
-  .goal-row td:first-child{color:var(--accent);font-weight:700}
-  .back-btn{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text3);font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;background:none;border:none;padding:0 0 4px 0;transition:color 0.15s}
-  .back-btn:hover{color:var(--text)}
-  
-  /* ==================== TAB 3: SOCIAL ==================== */
-  .social-table-wrap{overflow-x:auto;flex:1}
-  .social-table{border-collapse:collapse;width:100%;min-width:1100px;font-family:var(--mono);font-size:11px}
-  .social-table th{background:var(--surface2);color:var(--text3);padding:8px 10px;border:1px solid var(--border);text-transform:uppercase;letter-spacing:1px;font-size:10px;position:sticky;top:0;z-index:5}
-  .social-table td{border:1px solid var(--border);padding:6px 8px;background:var(--surface);vertical-align:middle}
-  .social-table tr:hover td{background:var(--surface2)}
-  .social-input{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:11px;outline:none}
-  .radio-group{display:flex;flex-direction:column;gap:3px}
-  .radio-item{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:10px;color:var(--text2)}
-  .radio-item input{width:12px;height:12px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
-  .check-group{display:grid;grid-template-columns:1fr 1fr;gap:3px}
-  .check-item{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:10px;color:var(--text2);white-space:nowrap}
-  .check-item input{width:12px;height:12px;accent-color:var(--accent3);cursor:pointer;flex-shrink:0}
-  .row-actions{display:flex;gap:4px;align-items:center}
-  .icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px 4px;font-size:12px;transition:color 0.15s;border-radius:3px}
-  .icon-btn:hover{color:var(--text);background:var(--surface3)}
-  .social-date{font-size:10px;color:var(--text3);white-space:nowrap}
-  
-  /* ==================== TAB 4: FITNESS ==================== */
-  .fitness-top{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
-  .fitness-date-nav{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px}
-  .weight-badge{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-family:var(--mono)}
-  .weight-badge label{font-size:10px;color:var(--text3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
-  .weight-input-field{font-size:20px;font-weight:700;color:var(--accent4);width:80px;background:none;border:none;outline:none;font-family:var(--mono)}
-  .day-type-selector{display:flex;gap:6px;flex-wrap:wrap}
-  .day-type-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text3);cursor:pointer;transition:all 0.15s;letter-spacing:1px;text-transform:uppercase}
-  .day-type-btn.active.day{border-color:var(--accent);color:var(--accent);background:rgba(124,106,255,0.12)}
-  .day-type-btn.active.night{border-color:var(--accent2);color:var(--accent2);background:rgba(255,106,158,0.12)}
-  .day-type-btn.active.gym{border-color:var(--accent3);color:var(--accent3);background:rgba(106,255,184,0.12)}
-  .day-type-btn.active.lazy{border-color:var(--text3);color:var(--text2);background:var(--surface3)}
-  .exercise-sections{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;flex:1}
-  .exercise-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px}
-  .exercise-section-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
-  .exercise-section-title[style*="Day"], .exercise-section-title[style*="Night"], .exercise-section-title[style*="Gym"]{
-    display:none;
-  }
-  .exercise-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border)}
-  .exercise-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent3);cursor:pointer;flex-shrink:0}
-  .exercise-name{flex:1;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:11px;outline:none}
-  .exercise-name.done{text-decoration:line-through;color:var(--text3)}
-  .exercise-sets{width:80px;font-size:10px;color:var(--text3)}
-  .template-actions{display:flex;gap:6px;margin-top:4px}
-  
-  /* ==================== TAB 5: APPS ==================== */
-  .apps-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .search-input{width:200px}
-  .status-filter{display:flex;gap:4px;flex-wrap:wrap}
-  .filter-pill{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--text3);cursor:pointer;transition:all 0.15s}
-  .filter-pill.active{border-color:var(--accent);color:var(--accent);background:rgba(124,106,255,0.12)}
-  .apps-table-wrap{overflow-x:auto;flex:1}
-  .apps-table{border-collapse:collapse;width:100%;min-width:900px;font-family:var(--mono);font-size:11px}
-  .apps-table th{background:var(--surface2);color:var(--text3);padding:8px 12px;border:1px solid var(--border);text-transform:uppercase;letter-spacing:1px;font-size:10px;position:sticky;top:0;z-index:5}
-  .apps-table td{border:1px solid var(--border);padding:8px 10px;background:var(--surface);vertical-align:middle}
-  .apps-table tr:hover td{background:var(--surface2)}
-  .apps-input{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:11px;outline:none}
-  .status-badge{padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:1px;border:1px solid;white-space:nowrap}
-  .status-idea{border-color:var(--text3);color:var(--text3)}
-  .status-planning{border-color:var(--accent4);color:var(--accent4)}
-  .status-building{border-color:var(--accent);color:var(--accent)}
-  .status-launched{border-color:var(--accent3);color:var(--accent3)}
-  .status-paused{border-color:var(--accent2);color:var(--accent2)}
-  .status-cancelled{border-color:var(--danger);color:var(--danger)}
-  .type-badge{padding:2px 8px;border-radius:12px;font-size:10px;border:1px solid var(--border2);color:var(--text2);white-space:nowrap}
-  .deadline-input{width:120px}
-  
-  /* EMPTY STATE */
-  .empty{text-align:center;padding:60px 20px;color:var(--text3);font-family:var(--mono);font-size:12px}
-  .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.3}
-  
-  @media(max-width:768px){
-    .exercise-sections{grid-template-columns:1fr}
-    .months-grid{grid-template-columns:repeat(3,1fr)}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" href="images/logo.png">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a24;
+      --surface3: #22222f;
+      --border: #2a2a3a;
+      --border2: #3a3a50;
+      --accent: #7c6aff;
+      --accent2: #ff6a9e;
+      --accent3: #6affb8;
+      --accent4: #ffb86a;
+      --text: #e8e8f0;
+      --text2: #9090a8;
+      --text3: #606078;
+      --danger: #ff4466;
+      --success: #44ff88;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+.header img {
+  display: block;
+  height: 30px; /* or whatever fits */
+}
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 2px
+    }
+
+    /* LAYOUT */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 0 24px;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 100
+    }
+
+    .logo {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--accent);
+      text-transform: uppercase
+    }
+
+    .logo span {
+      color: var(--accent2)
+    }
+
+    .date-badge {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 4px
+    }
+
+    /* NAV TABS */
+    .nav {
+      display: flex;
+      gap: 2px;
+      padding: 0 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0
+    }
+
+    .nav-tab {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+      white-space: nowrap
+    }
+
+    .nav-tab:hover {
+      color: var(--text2)
+    }
+
+    .nav-tab.active {
+      color: var(--accent)
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent)
+    }
+
+    .nav-tab:nth-child(2).active {
+      color: var(--accent2)
+    }
+
+    .nav-tab:nth-child(2).active::after {
+      background: var(--accent2)
+    }
+
+    .nav-tab:nth-child(3).active {
+      color: var(--accent3)
+    }
+
+    .nav-tab:nth-child(3).active::after {
+      background: var(--accent3)
+    }
+
+    .nav-tab:nth-child(4).active {
+      color: var(--accent4)
+    }
+
+    .nav-tab:nth-child(4).active::after {
+      background: var(--accent4)
+    }
+
+    .nav-tab:nth-child(5).active {
+      color: var(--accent)
+    }
+
+    /* CONTENT */
+    .content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
+    }
+
+    .tab-panel {
+      display: none;
+      flex: 1;
+      overflow: auto;
+      padding: 20px 24px
+    }
+
+ .tab-panel.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;       /* ensures child flex can scroll */
+  overflow: hidden;    /* parent hides overflow, child scrolls */
+}
+
+    /* BUTTONS */
+    .btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text2);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff
+    }
+
+    .btn.primary:hover {
+      background: #6a58e8;
+      border-color: #6a58e8;
+      color: #fff
+    }
+
+    .btn.danger {
+      border-color: var(--danger);
+      color: var(--danger)
+    }
+
+    .btn.danger:hover {
+      background: var(--danger);
+      color: #fff
+    }
+
+    .btn.small {
+      padding: 3px 8px;
+      font-size: 10px
+    }
+
+    .btn.success {
+      border-color: var(--success);
+      color: var(--success)
+    }
+
+    .btn.pink {
+      border-color: var(--accent2);
+      color: var(--accent2)
+    }
+
+    .btn.pink:hover {
+      background: var(--accent2);
+      color: #fff
+    }
+
+    /* INPUTS */
+    input,
+    textarea,
+    select {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color 0.15s
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent)
+    }
+
+    select option {
+      background: var(--surface2)
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px)
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 360px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto
+    }
+
+    .modal h3 {
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      font-family: var(--mono)
+    }
+
+    .modal-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-direction: column
+    }
+
+    .modal-row label {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: var(--mono)
+    }
+
+    .modal-row input,
+    .modal-row select,
+    .modal-row textarea {
+      width: 100%
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px
+    }
+
+    /* SECTION HEADER */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text3)
+    }
+
+    .pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid
+    }
+
+    /* ==================== TAB 1: CALENDAR ==================== */
+    .cal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .cal-header h2 {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: var(--sans)
+    }
+
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto
+    }
+
+    .cal-body {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 1;
+      min-height: 0
+    }
+
+    .cal-time-col {
+      background: var(--surface);
+      border-right: 1px solid var(--border)
+    }
+
+    .cal-time-slot {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .cal-events-col {
+      position: relative;
+      overflow-y: auto;
+      background: var(--surface)
+    }
+
+    .cal-event-row {
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.1s
+    }
+
+    .cal-event-row:hover {
+      background: var(--surface2)
+    }
+
+    .cal-event {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      cursor: pointer;
+      z-index: 10;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .cal-event .del-btn {
+      opacity: 0;
+      font-size: 9px;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      padding: 0 2px
+    }
+
+    .cal-event:hover .del-btn {
+      opacity: 1
+    }
+
+    .cal-now-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent2);
+      z-index: 20;
+      pointer-events: none
+    }
+
+    .cal-now-line::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent2)
+    }
+
+    .cal-week-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(7, 1fr);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      gap: 0
+    }
+
+    .cal-week-day-header {
+      background: var(--surface2);
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text3)
+    }
+
+    .cal-week-day-header.today {
+      color: var(--accent)
+    }
+
+    .cal-mode-toggle {
+      display: flex;
+      gap: 4px
+    }
+
+    .cal-mode-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      border-radius: 3px
+    }
+
+    .cal-mode-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff
+    }
+
+    /* ==================== TAB 2: TODO ==================== */
+    .months-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px
+    }
+
+    .month-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden
+    }
+
+    .month-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent2)
+    }
+
+    .month-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px)
+    }
+
+    .month-card h3 {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 4px
+    }
+
+    .month-card span {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3)
+    }
+
+    .todo-sheet {
+      overflow-x: auto;
+      flex: 1
+    }
+
+    .todo-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 11px;
+      min-width: 900px
+    }
+
+    .todo-table th {
+      background: var(--surface2);
+      color: var(--text3);
+      padding: 8px 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      font-size: 10px
+    }
+
+    .todo-table td {
+      border: 1px solid var(--border);
+      padding: 4px 6px;
+      vertical-align: top;
+      background: var(--surface)
+    }
+
+    .todo-table tr:hover td {
+      background: var(--surface2)
+    }
+
+    .todo-cell-input {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      resize: none;
+      min-height: 24px;
+      outline: none;
+      line-height: 1.4
+    }
+
+    .todo-day-label {
+      color: var(--text3);
+      font-size: 10px;
+      margin-bottom: 2px
+    }
+
+    .goal-row td {
+      background: rgba(124, 106, 255, 0.08) !important
+    }
+
+    .goal-row td:first-child {
+      color: var(--accent);
+      font-weight: 700
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text3);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      padding: 0 0 4px 0;
+      transition: color 0.15s
+    }
+
+    .back-btn:hover {
+      color: var(--text)
+    }
+
+    /* ==================== TAB 3: SOCIAL ==================== */
+    .social-table-wrap {
+      overflow-x: auto;
+      flex: 1
+    }
+
+    .social-table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1100px;
+      font-family: var(--mono);
+      font-size: 11px
+    }
+
+    .social-table th {
+      background: var(--surface2);
+      color: var(--text3);
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 5
+    }
+
+    .social-table td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      background: var(--surface);
+      vertical-align: middle
+    }
+
+    .social-table tr:hover td {
+      background: var(--surface2)
+    }
+
+    .social-input {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      outline: none
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text2)
+    }
+
+    .radio-item input {
+      width: 12px;
+      height: 12px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .check-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text2);
+      white-space: nowrap
+    }
+
+    .check-item input {
+      width: 12px;
+      height: 12px;
+      accent-color: var(--accent3);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      padding: 2px 4px;
+      font-size: 12px;
+      transition: color 0.15s;
+      border-radius: 3px
+    }
+
+    .icon-btn:hover {
+      color: var(--text);
+      background: var(--surface3)
+    }
+
+    .social-date {
+      font-size: 10px;
+      color: var(--text3);
+      white-space: nowrap
+    }
+
+    /* ==================== TAB 4: FITNESS ==================== */
+    .fitness-top {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: start
+    }
+
+    .fitness-date-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px
+    }
+
+    .weight-badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-family: var(--mono)
+    }
+
+    .weight-badge label {
+      font-size: 10px;
+      color: var(--text3);
+      display: block;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px
+    }
+
+    .weight-input-field {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent4);
+      width: 80px;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--mono)
+    }
+
+    .day-type-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .day-type-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 1px;
+      text-transform: uppercase
+    }
+
+    .day-type-btn.active.day {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124, 106, 255, 0.12)
+    }
+
+    .day-type-btn.active.night {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(255, 106, 158, 0.12)
+    }
+
+    .day-type-btn.active.gym {
+      border-color: var(--accent3);
+      color: var(--accent3);
+      background: rgba(106, 255, 184, 0.12)
+    }
+
+    .day-type-btn.active.lazy {
+      border-color: var(--text3);
+      color: var(--text2);
+      background: var(--surface3)
+    }
+
+    .exercise-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      flex: 1
+    }
+
+    .exercise-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .exercise-section-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px
+    }
+
+    .exercise-section-title[style*="Day"],
+    .exercise-section-title[style*="Night"],
+    .exercise-section-title[style*="Gym"] {
+      display: none;
+    }
+
+    .exercise-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      border: 1px solid var(--border)
+    }
+
+    .exercise-item input[type=checkbox] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent3);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .exercise-name {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      outline: none
+    }
+
+    .exercise-name.done {
+      text-decoration: line-through;
+      color: var(--text3)
+    }
+
+    .exercise-sets {
+      width: 80px;
+      font-size: 10px;
+      color: var(--text3)
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px
+    }
+
+    /* ==================== TAB 5: APPS ==================== */
+    .apps-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .search-input {
+      width: 200px
+    }
+
+    .status-filter {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap
+    }
+
+    .filter-pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all 0.15s
+    }
+
+    .filter-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124, 106, 255, 0.12)
+    }
+
+    .apps-table-wrap {
+      overflow-x: auto;
+      flex: 1
+    }
+
+    .apps-table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 900px;
+      font-family: var(--mono);
+      font-size: 11px
+    }
+
+    .apps-table th {
+      background: var(--surface2);
+      color: var(--text3);
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 5
+    }
+
+    .apps-table td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: var(--surface);
+      vertical-align: middle
+    }
+
+    .apps-table tr:hover td {
+      background: var(--surface2)
+    }
+
+    .apps-input {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      outline: none
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border: 1px solid;
+      white-space: nowrap
+    }
+
+    .status-idea {
+      border-color: var(--text3);
+      color: var(--text3)
+    }
+
+    .status-planning {
+      border-color: var(--accent4);
+      color: var(--accent4)
+    }
+
+    .status-building {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .status-launched {
+      border-color: var(--accent3);
+      color: var(--accent3)
+    }
+
+    .status-paused {
+      border-color: var(--accent2);
+      color: var(--accent2)
+    }
+
+    .status-cancelled {
+      border-color: var(--danger);
+      color: var(--danger)
+    }
+
+    .type-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      white-space: nowrap
+    }
+
+    .deadline-input {
+      width: 120px
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text3);
+      font-family: var(--mono);
+      font-size: 12px
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.3
+    }
+
+    .todo-table th, .todo-table td {
+  border: 1px solid var(--border);
+}
+
+    @media(max-width:768px) {
+      .exercise-sections {
+        grid-template-columns: 1fr
+      }
+
+      .months-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="app" id="app">
+  <div class="app" id="app">
 
-  <div class="header">
-    <div class="logo">Life<span>OS</span></div>
-    <div class="date-badge" id="headerDate"></div>
-  </div>
-
-  <div class="nav">
-    <button class="nav-tab active" onclick="switchTab(0)">📅 Calendar</button>
-    <button class="nav-tab" onclick="switchTab(1)">📋 Monthly Todo</button>
-    <button class="nav-tab" onclick="switchTab(2)">📱 Social Tracker</button>
-    <button class="nav-tab" onclick="switchTab(3)">💪 Fitness</button>
-    <button class="nav-tab" onclick="switchTab(4)">🚀 App Dev</button>
-  </div>
-
-  <div class="content">
-
-    <!-- ========== TAB 1: CALENDAR ========== -->
-    <div class="tab-panel active" id="tab0">
-      <div class="cal-header">
-        <div class="cal-mode-toggle">
-          <button class="cal-mode-btn active" id="dayModeBtn" onclick="setCalMode('day')">Day</button>
-          <button class="cal-mode-btn" id="weekModeBtn" onclick="setCalMode('week')">Week</button>
-        </div>
-        <h2 id="calTitle"></h2>
-        <div class="cal-nav">
-          <button class="btn small" onclick="calNav(-1)">‹ Prev</button>
-          <button class="btn small" onclick="calNavToday()">Today</button>
-          <button class="btn small" onclick="calNav(1)">Next ›</button>
-          <button class="btn primary small" onclick="openAddEvent()">+ Event</button>
-        </div>
-      </div>
-      <div id="calContainer" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto"></div>
+    <div class="header">
+      <div class="logo">Life<span>OS</span></div>
+      <div class="date-badge" id="headerDate"></div>
     </div>
 
-    <!-- ========== TAB 2: MONTHLY TODO ========== -->
-    <div class="tab-panel" id="tab1">
-      <div id="todoView">
+    <div class="nav">
+      <button class="nav-tab active" onclick="switchTab(0)">📅 Calendar</button>
+      <button class="nav-tab" onclick="switchTab(1)">📋 Monthly Todo</button>
+      <button class="nav-tab" onclick="switchTab(2)">📱 Social Tracker</button>
+      <button class="nav-tab" onclick="switchTab(3)">💪 Fitness</button>
+      <button class="nav-tab" onclick="switchTab(4)">🚀 App Dev</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ========== TAB 1: CALENDAR ========== -->
+      <div class="tab-panel active" id="tab0">
+        <div class="cal-header">
+          <div class="cal-mode-toggle">
+            <button class="cal-mode-btn active" id="dayModeBtn" onclick="setCalMode('day')">Day</button>
+            <button class="cal-mode-btn" id="weekModeBtn" onclick="setCalMode('week')">Week</button>
+          </div>
+          <h2 id="calTitle"></h2>
+          <div class="cal-nav">
+            <button class="btn small" onclick="calNav(-1)">‹ Prev</button>
+            <button class="btn small" onclick="calNavToday()">Today</button>
+            <button class="btn small" onclick="calNav(1)">Next ›</button>
+            <button class="btn primary small" onclick="openAddEvent()">+ Event</button>
+          </div>
+        </div>
+        <div id="calContainer" style="flex:1;min-height:0;overflow-y:auto"></div>
+      </div>
+
+      <!-- ========== TAB 2: MONTHLY TODO ========== -->
+      <div class="tab-panel" id="tab1">
+        <div id="todoView">
+          <div class="section-header">
+            <div class="section-title">Monthly Planner</div>
+            <span class="pill" style="border-color:var(--accent2);color:var(--accent2)" id="yearLabel"></span>
+          </div>
+          <div class="months-grid" id="monthsGrid"></div>
+        </div>
+        <div id="sheetView" style="display:none;flex:1;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="back-btn" onclick="closeSheet()">← Back</button>
+            <span class="section-title" id="sheetTitle"></span>
+          </div>
+          <div id="todoTableContainer" style="max-height: 500px; overflow-y: auto;">
+  <table id="todoTable" style="border-collapse: collapse; width: 100%;"></table>
+</div>
+        </div>
+      </div>
+
+      <!-- ========== TAB 3: SOCIAL TRACKER ========== -->
+      <div class="tab-panel" id="tab2">
         <div class="section-header">
-          <div class="section-title">Monthly Planner</div>
-          <span class="pill" style="border-color:var(--accent2);color:var(--accent2)" id="yearLabel"></span>
+          <div class="section-title">Social Media Tracker</div>
+          <button class="btn primary small" onclick="addSocialRow('top')">+ Row Top</button>
+          <button class="btn small" onclick="addSocialRow('bottom')">+ Row Bottom</button>
         </div>
-        <div class="months-grid" id="monthsGrid"></div>
+        <div class="social-table-wrap">
+          <table class="social-table">
+            <thead>
+              <tr>
+                <th style="width:32px"></th>
+                <th>Date</th>
+                <th style="min-width:160px">Content Title</th>
+                <th style="min-width:120px">TikTok</th>
+                <th style="min-width:120px">YouTube</th>
+                <th style="min-width:120px">Instagram</th>
+                <th style="min-width:120px">X / Twitter</th>
+                <th style="min-width:140px">50 Interactions</th>
+                <th style="width:60px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="socialBody"></tbody>
+          </table>
+        </div>
       </div>
-      <div id="sheetView" style="display:none;flex:1;flex-direction:column;gap:12px;display:none">
-        <div style="display:flex;align-items:center;gap:12px">
-          <button class="back-btn" onclick="closeSheet()">← Back</button>
-          <span class="section-title" id="sheetTitle"></span>
-        </div>
-        <div class="todo-sheet">
-          <table class="todo-table" id="todoTable"></table>
-        </div>
-      </div>
-    </div>
 
-    <!-- ========== TAB 3: SOCIAL TRACKER ========== -->
-    <div class="tab-panel" id="tab2">
-      <div class="section-header">
-        <div class="section-title">Social Media Tracker</div>
-        <button class="btn primary small" onclick="addSocialRow('top')">+ Row Top</button>
-        <button class="btn small" onclick="addSocialRow('bottom')">+ Row Bottom</button>
+      <!-- ========== TAB 4: FITNESS ========== -->
+      <div class="tab-panel" id="tab3">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div class="fitness-date-nav">
+            <button class="btn small" onclick="fitnessNav(-1)">‹</button>
+            <span id="fitnessDateLabel" style="min-width:120px;text-align:center"></span>
+            <button class="btn small" onclick="fitnessNav(1)">›</button>
+            <button class="btn small" onclick="fitnessNavToday()">Today</button>
+          </div>
+          <div class="weight-badge">
+            <label>Weight (kg)</label>
+            <input class="weight-input-field" type="number" step="0.1" id="weightInput" placeholder="0.0"
+              oninput="saveFitnessData()">
+            <span id="weightDelta" style="font-size:10px;margin-left:8px;color:var(--text3)"></span>
+          </div>
+          <div class="day-type-selector" id="dayTypeSelector"></div>
+          <button class="btn small pink" onclick="duplicateFromDate(prompt('Enter date (YYYY-MM-DD)'))">Duplicate From
+            Date</button>
+          <button class="btn primary small" onclick="openAddExercise()">+ Exercise</button>
+        </div>
+        <div class="exercise-sections" id="exerciseSections">
+          <div class="exercise-section">
+            <div class="exercise-section-title" style="color:var(--accent)">🌅 Day Workout</div>
+            <div id="exList_day"></div>
+            <button class="btn small" onclick="openAddExercise('day')">+ Add</button>
+          </div>
+          <div class="exercise-section">
+            <div class="exercise-section-title" style="color:var(--accent2)">🌙 Night</div>
+            <div id="exList_night"></div>
+            <button class="btn small" onclick="openAddExercise('night')">+ Add</button>
+          </div>
+          <div class="exercise-section">
+            <div class="exercise-section-title" style="color:var(--accent3)">🏋️ Gym</div>
+            <div id="exList_gym"></div>
+            <button class="btn small" onclick="openAddExercise('gym')">+ Add</button>
+          </div>
+        </div>
       </div>
-      <div class="social-table-wrap">
-        <table class="social-table">
-          <thead>
-            <tr>
-              <th style="width:32px"></th>
-              <th>Date</th>
-              <th style="min-width:160px">Content Title</th>
-              <th style="min-width:120px">TikTok</th>
-              <th style="min-width:120px">YouTube</th>
-              <th style="min-width:120px">Instagram</th>
-              <th style="min-width:120px">X / Twitter</th>
-              <th style="min-width:140px">50 Interactions</th>
-              <th style="width:60px">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="socialBody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- ========== TAB 4: FITNESS ========== -->
-    <div class="tab-panel" id="tab3">
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <div class="fitness-date-nav">
-          <button class="btn small" onclick="fitnessNav(-1)">‹</button>
-          <span id="fitnessDateLabel" style="min-width:120px;text-align:center"></span>
-          <button class="btn small" onclick="fitnessNav(1)">›</button>
-          <button class="btn small" onclick="fitnessNavToday()">Today</button>
+      <!-- ========== TAB 5: APP DEV ========== -->
+      <div class="tab-panel" id="tab4">
+        <div class="apps-controls">
+          <input class="search-input" type="text" placeholder="Search apps..." oninput="filterApps(this.value)"
+            id="appSearch">
+          <div class="status-filter" id="statusFilter"></div>
+          <button class="btn primary small" onclick="openAddApp()" style="margin-left:auto">+ New App</button>
         </div>
-        <div class="weight-badge">
-          <label>Weight (kg)</label>
-          <input class="weight-input-field" type="number" step="0.1" id="weightInput" placeholder="0.0" oninput="saveFitnessData()">
-          <span id="weightDelta" style="font-size:10px;margin-left:8px;color:var(--text3)"></span>
-        </div>
-        <div class="day-type-selector" id="dayTypeSelector"></div>
-        <button class="btn small pink" onclick="duplicateFromDate(prompt('Enter date (YYYY-MM-DD)'))">Duplicate From Date</button>
-        <button class="btn primary small" onclick="openAddExercise()">+ Exercise</button>
-      </div>
-      <div class="exercise-sections" id="exerciseSections">
-        <div class="exercise-section">
-          <div class="exercise-section-title" style="color:var(--accent)">🌅 Day Workout</div>
-          <div id="exList_day"></div>
-          <button class="btn small" onclick="openAddExercise('day')">+ Add</button>
-        </div>
-        <div class="exercise-section">
-          <div class="exercise-section-title" style="color:var(--accent2)">🌙 Night</div>
-          <div id="exList_night"></div>
-          <button class="btn small" onclick="openAddExercise('night')">+ Add</button>
-        </div>
-        <div class="exercise-section">
-          <div class="exercise-section-title" style="color:var(--accent3)">🏋️ Gym</div>
-          <div id="exList_gym"></div>
-          <button class="btn small" onclick="openAddExercise('gym')">+ Add</button>
+        <div class="apps-table-wrap">
+          <table class="apps-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th style="min-width:140px">App Name / Idea</th>
+                <th style="min-width:200px">Short Description</th>
+                <th style="min-width:100px">Status</th>
+                <th style="min-width:100px">Type</th>
+                <th style="min-width:200px">Additional Info</th>
+                <th style="min-width:110px">Deadline</th>
+                <th style="width:60px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appsBody"></tbody>
+          </table>
         </div>
       </div>
-    </div>
 
-    <!-- ========== TAB 5: APP DEV ========== -->
-    <div class="tab-panel" id="tab4">
-      <div class="apps-controls">
-        <input class="search-input" type="text" placeholder="Search apps..." oninput="filterApps(this.value)" id="appSearch">
-        <div class="status-filter" id="statusFilter"></div>
-        <button class="btn primary small" onclick="openAddApp()" style="margin-left:auto">+ New App</button>
-      </div>
-      <div class="apps-table-wrap">
-        <table class="apps-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th style="min-width:140px">App Name / Idea</th>
-              <th style="min-width:200px">Short Description</th>
-              <th style="min-width:100px">Status</th>
-              <th style="min-width:100px">Type</th>
-              <th style="min-width:200px">Additional Info</th>
-              <th style="min-width:110px">Deadline</th>
-              <th style="width:60px">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="appsBody"></tbody>
-        </table>
-      </div>
     </div>
-
   </div>
-</div>
 
-<!-- MODAL CONTAINER -->
-<div id="modalOverlay" class="modal-overlay" style="display:none" onclick="closeModalOnOverlay(event)">
-  <div class="modal" id="modalBox"></div>
-</div>
+  <!-- MODAL CONTAINER -->
+  <div id="modalOverlay" class="modal-overlay" style="display:none" onclick="closeModalOnOverlay(event)">
+    <div class="modal" id="modalBox"></div>
+  </div>
 
-<script>
-// ============================================================
-// STATE MANAGEMENT
-// ============================================================
-const STORE_KEY = 'nexus_data_v2';
+  <script>
+    // ============================================================
+    // STATE MANAGEMENT
+    // ============================================================
+    const STORE_KEY = 'nexus_data_v2';
 
-let state = {
-  events: [],        // calendar events
-  todoData: {},      // { "2025-01": { rows: [...] } }
-  socialRows: [],    // social tracker rows
-  fitness: {},       // { "2025-01-15": { weight, dayType, exercises: {day:[],night:[],gym:[]} } }
-  apps: [],          // app dev items
-};
+    let state = {
+      events: [],        // calendar events
+      todoData: {},      // { "2025-01": { rows: [...] } }
+      socialRows: [],    // social tracker rows
+      fitness: {},       // { "2025-01-15": { weight, dayType, exercises: {day:[],night:[],gym:[]} } }
+      apps: [],          // app dev items
+    };
 
-function load() {
-  try { const s = localStorage.getItem(STORE_KEY); if(s) state = JSON.parse(s); } catch(e){}
-  if(!state.events) state.events=[];
-  if(!state.todoData) state.todoData={};
-  if(!state.socialRows) state.socialRows=[];
-  if(!state.fitness) state.fitness={};
-  if(!state.apps) state.apps=[];
-}
+    function load() {
+      try { const s = localStorage.getItem(STORE_KEY); if (s) state = JSON.parse(s); } catch (e) { }
+      if (!state.events) state.events = [];
+      if (!state.todoData) state.todoData = {};
+      if (!state.socialRows) state.socialRows = [];
+      if (!state.fitness) state.fitness = {};
+      if (!state.apps) state.apps = [];
+    }
 
-function save() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
-}
+    function save() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { }
+    }
 
-// ============================================================
-// UTILS
-// ============================================================
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    // ============================================================
+    // UTILS
+    // ============================================================
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function today() { return new Date(); }
-function fmtDate(d) { return d.toISOString().slice(0,10); }
-function fmtMonthKey(y,m) { return `${y}-${String(m+1).padStart(2,'0')}`; }
-function parseMonthKey(k) { const [y,m]=k.split('-'); return {y:parseInt(y),m:parseInt(m)-1}; }
-function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+    function today() { return new Date(); }
+    function fmtDate(d) { return d.toISOString().slice(0, 10); }
+    function fmtMonthKey(y, m) { return `${y}-${String(m + 1).padStart(2, '0')}`; }
+    function parseMonthKey(k) { const [y, m] = k.split('-'); return { y: parseInt(y), m: parseInt(m) - 1 }; }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
-function openModal(html) {
-  document.getElementById('modalBox').innerHTML = html;
-  document.getElementById('modalOverlay').style.display = 'flex';
-}
-function closeModal() {
-  document.getElementById('modalOverlay').style.display = 'none';
-}
-function closeModalOnOverlay(e) {
-  if(e.target === document.getElementById('modalOverlay')) closeModal();
-}
+    function openModal(html) {
+      document.getElementById('modalBox').innerHTML = html;
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+    function closeModalOnOverlay(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
 
-// ============================================================
-// TABS
-// ============================================================
-let currentTab = 0;
-function switchTab(i) {
-  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
-  document.querySelectorAll('.nav-tab').forEach((b,j)=>b.classList.toggle('active',j===i));
-  currentTab = i;
-  if(i===0) renderCal();
-  if(i===1) renderTodoMonths();
-  if(i===2) renderSocial();
-  if(i===3) renderFitness();
-  if(i===4) renderApps();
-}
+    // ============================================================
+    // TABS
+    // ============================================================
+    let currentTab = 0;
+    function switchTab(i) {
+      document.querySelectorAll('.tab-panel').forEach((p, j) => p.classList.toggle('active', j === i));
+      document.querySelectorAll('.nav-tab').forEach((b, j) => b.classList.toggle('active', j === i));
+      currentTab = i;
+      if (i === 0) renderCal();
+      if (i === 1) renderTodoMonths();
+      if (i === 2) renderSocial();
+      if (i === 3) renderFitness();
+      if (i === 4) renderApps();
+    }
 
-// Header date
-function updateHeaderDate() {
-  const d = today();
-  document.getElementById('headerDate').textContent = d.toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
-}
+    // Header date
+    function updateHeaderDate() {
+      const d = today();
+      document.getElementById('headerDate').textContent = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    }
 
-// ============================================================
-// TAB 1: CALENDAR
-// ============================================================
-let calMode = 'day';
-let calDate = new Date();
+    // ============================================================
+    // TAB 1: CALENDAR
+    // ============================================================
+    let calMode = 'day';
+    let calDate = new Date();
 
-const EVENT_COLORS = ['#7c6aff','#ff6a9e','#6affb8','#ffb86a','#6aaeff','#ff6a6a'];
+    const EVENT_COLORS = ['#7c6aff', '#ff6a9e', '#6affb8', '#ffb86a', '#6aaeff', '#ff6a6a'];
 
-function setCalMode(m) {
-  calMode = m;
-  document.getElementById('dayModeBtn').classList.toggle('active', m==='day');
-  document.getElementById('weekModeBtn').classList.toggle('active', m==='week');
-  renderCal();
-}
+    function setCalMode(m) {
+      calMode = m;
+      document.getElementById('dayModeBtn').classList.toggle('active', m === 'day');
+      document.getElementById('weekModeBtn').classList.toggle('active', m === 'week');
+      renderCal();
+    }
 
-function calNav(d) {
-  if(calMode==='day') calDate.setDate(calDate.getDate()+d);
-  else calDate.setDate(calDate.getDate()+d*7);
-  renderCal();
-}
-function calNavToday() { calDate = new Date(); renderCal(); }
+    function calNav(d) {
+      if (calMode === 'day') calDate.setDate(calDate.getDate() + d);
+      else calDate.setDate(calDate.getDate() + d * 7);
+      renderCal();
+    }
+    function calNavToday() { calDate = new Date(); renderCal(); }
 
-function renderCal() {
-  if(calMode==='day') renderDayView();
-  else renderWeekView();
-}
+    function renderCal() {
+      if (calMode === 'day') renderDayView();
+      else renderWeekView();
+    }
 
-function renderDayView() {
-  const d = calDate;
-  const key = fmtDate(d);
-  document.getElementById('calTitle').textContent = d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  
-  const hours = Array.from({length:24},(_,i)=>i);
-  const todayEvents = state.events.filter(e=>e.date===key);
-  
-  let html = `<div class="cal-body" style="flex:1;min-height:0"><div class="cal-time-col">`;
-  hours.forEach(h=>{
-    html+=`<div class="cal-time-slot">${h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm'}</div>`;
-  });
-  html+=`</div><div class="cal-events-col" id="calEventsCol">`;
-  hours.forEach(h=>{
-    html+=`<div class="cal-event-row" data-hour="${h}" onclick="addEventAtHour(${h})"></div>`;
-  });
-  
-  // Now line
-  const now = new Date();
-  if(fmtDate(now)===key) {
-    const pct = (now.getHours()*60+now.getMinutes())/(24*60)*100;
-    html+=`<div class="cal-now-line" style="top:${pct}%"></div>`;
-  }
-  
-  // Events
-  todayEvents.forEach(ev=>{
-    const top = ev.startH/24*100;
-    const height = Math.max((ev.endH-ev.startH)/24*100, 100/24);
-    const color = ev.color||EVENT_COLORS[0];
-    html+=`<div class="cal-event" style="top:calc(${top}% + 1px);height:calc(${height}% - 2px);background:${color}20;border-left:3px solid ${color};color:${color}" data-id="${ev.id}">
+    function renderDayView() {
+      const d = calDate;
+      const key = fmtDate(d);
+      document.getElementById('calTitle').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      const hours = Array.from({ length: 24 }, (_, i) => i);
+      const todayEvents = state.events.filter(e => e.date === key);
+
+      let html = `<div class="cal-body" style="flex:1;min-height:0"><div class="cal-time-col">`;
+      hours.forEach(h => {
+        html += `<div class="cal-time-slot">${h === 0 ? '12am' : h < 12 ? h + 'am' : h === 12 ? '12pm' : (h - 12) + 'pm'}</div>`;
+      });
+      html += `</div><div class="cal-events-col" id="calEventsCol">`;
+      hours.forEach(h => {
+        html += `<div class="cal-event-row" data-hour="${h}" onclick="addEventAtHour(${h})"></div>`;
+      });
+
+      // Now line
+      const now = new Date();
+      if (fmtDate(now) === key) {
+        const pct = (now.getHours() * 60 + now.getMinutes()) / (24 * 60) * 100;
+        html += `<div class="cal-now-line" style="top:${pct}%"></div>`;
+      }
+
+      // Events
+      todayEvents.forEach(ev => {
+        const top = ev.startH / 24 * 100;
+        const height = Math.max((ev.endH - ev.startH) / 24 * 100, 100 / 24);
+        const color = ev.color || EVENT_COLORS[0];
+        html += `<div class="cal-event" style="top:calc(${top}% + 1px);height:calc(${height}% - 2px);background:${color}20;border-left:3px solid ${color};color:${color}" data-id="${ev.id}">
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.title}</span>
       <button class="del-btn" onclick="deleteEvent('${ev.id}',event)">✕</button>
     </div>`;
-  });
-  
-  html+=`</div></div>`;
-  document.getElementById('calContainer').innerHTML = html;
-}
+      });
 
-function renderWeekView() {
-  const d = new Date(calDate);
-  const day = d.getDay();
-  const weekStart = new Date(d);
-  weekStart.setDate(d.getDate()-day);
-  const weekDays = Array.from({length:7},(_,i)=>{const x=new Date(weekStart);x.setDate(weekStart.getDate()+i);return x;});
-  
-  const startStr = weekStart.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const endD = new Date(weekStart); endD.setDate(weekStart.getDate()+6);
-  const endStr = endD.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('calTitle').textContent = `${startStr} — ${endStr}`;
-  
-  const hours = Array.from({length:24},(_,i)=>i);
-  const todayKey = fmtDate(new Date());
-  
-  let html = `<div style="display:grid;grid-template-columns:80px repeat(7,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:1;min-height:0;flex-direction:column">`;
-  // Header row
-  html+=`<div style="background:var(--surface2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);height:36px"></div>`;
-  weekDays.forEach(wd=>{
-    const isToday = fmtDate(wd)===todayKey;
-    html+=`<div style="background:var(--surface2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);height:36px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;${isToday?'color:var(--accent)':'color:var(--text3)'}">
+      html += `</div></div>`;
+      document.getElementById('calContainer').innerHTML = html;
+    }
+
+    function renderWeekView() {
+      const d = new Date(calDate);
+      const day = d.getDay();
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - day);
+      const weekDays = Array.from({ length: 7 }, (_, i) => { const x = new Date(weekStart); x.setDate(weekStart.getDate() + i); return x; });
+
+      const startStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const endD = new Date(weekStart); endD.setDate(weekStart.getDate() + 6);
+      const endStr = endD.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      document.getElementById('calTitle').textContent = `${startStr} — ${endStr}`;
+
+      const hours = Array.from({ length: 24 }, (_, i) => i);
+      const todayKey = fmtDate(new Date());
+
+      let html = `<div style="display:grid;grid-template-columns:80px repeat(7,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:1;min-height:0;flex-direction:column">`;
+      // Header row
+      html += `<div style="background:var(--surface2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);height:36px"></div>`;
+      weekDays.forEach(wd => {
+        const isToday = fmtDate(wd) === todayKey;
+        html += `<div style="background:var(--surface2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);height:36px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;${isToday ? 'color:var(--accent)' : 'color:var(--text3)'}">
       ${DAYS[wd.getDay()]} ${wd.getDate()}
     </div>`;
-  });
-  
-  // Time rows — scrollable wrapper
-  html+=`</div><div style="flex:1;overflow-y:auto;display:grid;grid-template-columns:80px repeat(7,1fr);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">`;
-  hours.forEach(h=>{
-    html+=`<div style="height:40px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:var(--mono);font-size:9px;color:var(--text3)">${h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm'}</div>`;
-    weekDays.forEach(wd=>{
-      const dk = fmtDate(wd);
-      const evs = state.events.filter(e=>e.date===dk&&Math.floor(e.startH)===h);
-      let inner = evs.map(ev=>`<div style="background:${ev.color||EVENT_COLORS[0]}30;border-left:2px solid ${ev.color||EVENT_COLORS[0]};padding:1px 4px;font-size:9px;font-family:var(--mono);color:${ev.color||EVENT_COLORS[0]};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;margin-bottom:1px" onclick="deleteEventConfirm('${ev.id}')">${ev.title}</div>`).join('');
-      html+=`<div style="height:40px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);overflow:hidden;padding:1px">${inner}</div>`;
-    });
-  });
-  html+=`</div>`;
-  
-  document.getElementById('calContainer').innerHTML = html;
-}
+      });
 
-function addEventAtHour(h) {
-  openAddEvent(h);
-}
+      // Time rows — scrollable wrapper
+      html += `</div><div style="flex:1;overflow-y:auto;display:grid;grid-template-columns:80px repeat(7,1fr);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">`;
+      hours.forEach(h => {
+        html += `<div style="height:40px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:var(--mono);font-size:9px;color:var(--text3)">${h === 0 ? '12am' : h < 12 ? h + 'am' : h === 12 ? '12pm' : (h - 12) + 'pm'}</div>`;
+        weekDays.forEach(wd => {
+          const dk = fmtDate(wd);
+          const evs = state.events.filter(e => e.date === dk && Math.floor(e.startH) === h);
+          let inner = evs.map(ev => `<div style="background:${ev.color || EVENT_COLORS[0]}30;border-left:2px solid ${ev.color || EVENT_COLORS[0]};padding:1px 4px;font-size:9px;font-family:var(--mono);color:${ev.color || EVENT_COLORS[0]};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;margin-bottom:1px" onclick="deleteEventConfirm('${ev.id}')">${ev.title}</div>`).join('');
+          html += `<div style="height:40px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);overflow:hidden;padding:1px">${inner}</div>`;
+        });
+      });
+      html += `</div>`;
 
-function openAddEvent(defaultHour=9) {
-  const dateStr = fmtDate(calDate);
-  openModal(`
+      document.getElementById('calContainer').innerHTML = html;
+    }
+
+    function addEventAtHour(h) {
+      openAddEvent(h);
+    }
+
+    function openAddEvent(defaultHour = 9) {
+      const dateStr = fmtDate(calDate);
+      openModal(`
     <h3>Add Event</h3>
     <div class="modal-row"><label>Title</label><input id="evTitle" placeholder="Event title" autofocus></div>
     <div class="modal-row"><label>Date</label><input id="evDate" type="date" value="${dateStr}"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div class="modal-row"><label>Start Time</label><input id="evStart" type="time" value="${String(defaultHour).padStart(2,'0')}:00"></div>
-      <div class="modal-row"><label>End Time</label><input id="evEnd" type="time" value="${String(Math.min(defaultHour+1,23)).padStart(2,'0')}:00"></div>
+      <div class="modal-row"><label>Start Time</label><input id="evStart" type="time" value="${String(defaultHour).padStart(2, '0')}:00"></div>
+      <div class="modal-row"><label>End Time</label><input id="evEnd" type="time" value="${String(Math.min(defaultHour + 1, 23)).padStart(2, '0')}:00"></div>
     </div>
     <div class="modal-row"><label>Color</label><div style="display:flex;gap:6px;margin-top:4px" id="colorPicker">
-      ${EVENT_COLORS.map((c,i)=>`<div onclick="selectColor('${c}')" data-color="${c}" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${i===0?'white':'transparent'};transition:border-color 0.15s"></div>`).join('')}
+      ${EVENT_COLORS.map((c, i) => `<div onclick="selectColor('${c}')" data-color="${c}" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${i === 0 ? 'white' : 'transparent'};transition:border-color 0.15s"></div>`).join('')}
     </div></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
       <button class="btn primary" onclick="saveEvent()">Add Event</button>
     </div>
   `);
-  document.getElementById('evTitle').focus();
-}
+      document.getElementById('evTitle').focus();
+    }
 
-let selectedColor = EVENT_COLORS[0];
-function selectColor(c) {
-  selectedColor = c;
-  document.querySelectorAll('#colorPicker div').forEach(d=>{
-    d.style.borderColor = d.dataset.color===c?'white':'transparent';
-  });
-}
+    let selectedColor = EVENT_COLORS[0];
+    function selectColor(c) {
+      selectedColor = c;
+      document.querySelectorAll('#colorPicker div').forEach(d => {
+        d.style.borderColor = d.dataset.color === c ? 'white' : 'transparent';
+      });
+    }
 
-function saveEvent() {
-  const title = document.getElementById('evTitle').value.trim();
-  const date = document.getElementById('evDate').value;
-  const start = document.getElementById('evStart').value;
-  const end = document.getElementById('evEnd').value;
-  if(!title||!date) return;
-  const [sh,sm]=start.split(':').map(Number);
-  const [eh,em]=end.split(':').map(Number);
-  state.events.push({ id:uid(), title, date, startH:sh+sm/60, endH:eh+em/60, color:selectedColor });
-  selectedColor = EVENT_COLORS[0];
-  save(); closeModal(); renderCal();
-}
+    function saveEvent() {
+      const title = document.getElementById('evTitle').value.trim();
+      const date = document.getElementById('evDate').value;
+      const start = document.getElementById('evStart').value;
+      const end = document.getElementById('evEnd').value;
+      if (!title || !date) return;
+      const [sh, sm] = start.split(':').map(Number);
+      const [eh, em] = end.split(':').map(Number);
+      state.events.push({ id: uid(), title, date, startH: sh + sm / 60, endH: eh + em / 60, color: selectedColor });
+      selectedColor = EVENT_COLORS[0];
+      save(); closeModal(); renderCal();
+    }
 
-function deleteEvent(id, e) {
-  e.stopPropagation();
-  state.events = state.events.filter(ev=>ev.id!==id);
-  save(); renderCal();
-}
-function deleteEventConfirm(id) {
-  if(confirm('Delete this event?')) { state.events=state.events.filter(ev=>ev.id!==id); save(); renderCal(); }
-}
+    function deleteEvent(id, e) {
+      e.stopPropagation();
+      state.events = state.events.filter(ev => ev.id !== id);
+      save(); renderCal();
+    }
+    function deleteEventConfirm(id) {
+      if (confirm('Delete this event?')) { state.events = state.events.filter(ev => ev.id !== id); save(); renderCal(); }
+    }
 
-// ============================================================
-// TAB 2: MONTHLY TODO
-// ============================================================
-let currentSheetKey = null;
+    // ============================================================
+    // TAB 2: MONTHLY TODO
+    // ============================================================
+    let currentSheetKey = null;
 
-function renderTodoMonths() {
-  const y = today().getFullYear();
-  document.getElementById('yearLabel').textContent = y;
-  const grid = document.getElementById('monthsGrid');
-  grid.innerHTML = MONTHS.map((m,i)=>{
-    const key = fmtMonthKey(y,i);
-    const data = state.todoData[key];
-    const count = data ? data.rows.filter(r=>r.cells&&r.cells.some(c=>c)).length : 0;
-    return `<div class="month-card" onclick="openSheet('${key}')">
+    function renderTodoMonths() {
+      const y = today().getFullYear();
+      document.getElementById('yearLabel').textContent = y;
+      const grid = document.getElementById('monthsGrid');
+      grid.innerHTML = MONTHS.map((m, i) => {
+        const key = fmtMonthKey(y, i);
+        const data = state.todoData[key];
+        const count = data ? data.rows.filter(r => r.cells && r.cells.some(c => c)).length : 0;
+        return `<div class="month-card" onclick="openSheet('${key}')">
       <h3>${m}</h3>
       <span>${count} entries</span>
     </div>`;
-  }).join('');
-  document.getElementById('todoView').style.display='';
-  document.getElementById('sheetView').style.display='none';
-}
+      }).join('');
+      document.getElementById('todoView').style.display = '';
+      document.getElementById('sheetView').style.display = 'none';
+    }
 
-function openSheet(key) {
-  currentSheetKey = key;
-  const {y,m} = parseMonthKey(key);
-  document.getElementById('sheetTitle').textContent = `${MONTHS[m]} ${y}`;
-  
-  if(!state.todoData[key]) {
-    // Build default rows: 4 weeks × (7 days + goals)
-    state.todoData[key] = { rows: buildDefaultRows(y,m) };
-    save();
+    function openSheet(key) {
+      currentSheetKey = key;
+      const { y, m } = parseMonthKey(key);
+      document.getElementById('sheetTitle').textContent = `${MONTHS[m]} ${y}`;
+
+      if (!state.todoData[key]) {
+        // Build default rows: 4 weeks × (7 days + goals)
+        state.todoData[key] = { rows: buildDefaultRows(y, m) };
+        save();
+      }
+
+      renderSheet();
+      document.getElementById('todoView').style.display = 'none';
+      document.getElementById('sheetView').style.display = 'flex';
+      document.getElementById('sheetView').style.flexDirection = 'column';
+      document.getElementById('sheetView').style.gap = '12px';
+    }
+
+
+    function generateMonthDays(year, month) {
+  const firstDay = new Date(year, month, 1); // 1st day of month
+  const lastDay = new Date(year, month + 1, 0); // last day of month
+  const daysInMonth = lastDay.getDate();
+  const startDay = firstDay.getDay(); // 0 = Sunday, 1 = Monday ...
+
+  const daysArray = [];
+
+  // optional: fill empty slots before first day
+  for (let i = 0; i < startDay; i++) {
+    daysArray.push(null);
   }
-  
-  renderSheet();
-  document.getElementById('todoView').style.display='none';
-  document.getElementById('sheetView').style.display='flex';
-  document.getElementById('sheetView').style.flexDirection='column';
-  document.getElementById('sheetView').style.gap='12px';
-}
 
-function buildDefaultRows(y,m) {
-  const rows = [];
-  for(let week=0; week<4; week++){
-    rows.push({ cells: Array(7).fill('') }); // make sure each row has cells
+  // fill actual days
+  for (let d = 1; d <= daysInMonth; d++) {
+    daysArray.push(d);
   }
-  return rows;
+
+  return daysArray;
 }
 
-function renderSheet() {
-  const sheet = state.todoData[currentSheetKey];
-  if(!sheet || !sheet.rows) return; // <-- prevent error
-
-  sheet.rows.forEach(r => {
-    // existing rendering code
-  });
-}
-
-function buildDefaultRows(y,m) {
+function buildDefaultRows(y, m) {
   const rows = [];
-  const daysInMonth = new Date(y,m+1,0).getDate();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
   let dayCount = 1;
-  
+
   // Header row
-  rows.push({type:'header', cells:['Week 1','Week 2','Week 3','Week 4']});
-  
-  for(let w=0;w<4;w++){
+  rows.push({ type: 'header', cells: ['Week 1', 'Week 2', 'Week 3', 'Week 4'] });
+
+  for (let w = 0; w < 4; w++) {
     // 7 day rows per week
-    for(let d=0;d<7;d++){
-      const dayName = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][d];
-      rows.push({type:'day',dayLabel:`${dayName} ${dayCount<=daysInMonth?dayCount:''}`,weekIdx:w,cells:['','','','']});
-      if(dayCount<=daysInMonth) dayCount++;
+    for (let d = 0; d < 7; d++) {
+      const dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d];
+      rows.push({
+        type: 'day',
+        dayLabel: `${dayName} ${dayCount <= daysInMonth ? dayCount : ''}`,
+        weekIdx: w,
+        cells: ['', '', '', '']
+      });
+      if (dayCount <= daysInMonth) dayCount++;
     }
     // Week goal row
-    rows.push({type:'weekgoal',weekIdx:w,label:`Week ${w+1} Goal`,cells:['','','','']});
+    rows.push({
+      type: 'weekgoal',
+      weekIdx: w,
+      label: `Week ${w + 1} Goal`,
+      cells: ['', '', '', '']
+    });
   }
-  
+
   // Month goal
-  rows.push({type:'monthgoal',label:'📅 Month Goal',cells:['','','','']});
+  rows.push({ type: 'monthgoal', label: '📅 Month Goal', cells: ['', '', '', ''] });
   // Quarter goal
-  rows.push({type:'quartergoal',label:`📊 Q${Math.floor(m/3)+1} Goal`,cells:['','','','']});
+  rows.push({ type: 'quartergoal', label: `📊 Q${Math.floor(m / 3) + 1} Goal`, cells: ['', '', '', ''] });
   // Year goal
-  rows.push({type:'yeargoal',label:`🎯 Year ${y} Goal`,cells:['','','','']});
-  
+  rows.push({ type: 'yeargoal', label: `🎯 Year ${y} Goal`, cells: ['', '', '', ''] });
+
   return rows;
 }
 
-function renderSheet() {
+ function renderSheet() {
   const sheet = state.todoData[currentSheetKey];
-  if(!sheet || !sheet.rows) return; // <-- prevent error
-  const data = state.todoData[currentSheetKey];
-  if(!data) return;
-  const rows = data.rows;
-  
-  let html=``;
-  rows.forEach((row,ri)=>{
-    if(row.type==='header'){
-      html+=`<tr><th style="width:90px;position:sticky;left:0;z-index:6;background:var(--surface2)">Day</th>`;
-      row.cells.forEach(c=>`<th>${c}</th>`).forEach(s=>html+=s);
-      html+=`</tr>`;
+  if (!sheet || !sheet.rows) return;
+
+  let html = '';
+
+  sheet.rows.forEach((row, ri) => {
+    // Skip empty rows
+    if (!row.label && (!row.cells || row.cells.length === 0)) return;
+
+    // HEADER row
+    if (row.type === 'header') {
+      html += `<tr>
+        <th style="width:90px;position:sticky;left:0;z-index:6;background:var(--surface2);border:1px solid var(--border)">Day</th>
+        <th style="border:1px solid var(--border)">${row.cells[0] || ''}</th>
+      </tr>`;
       return;
     }
-    
-    const isGoal = row.type.includes('goal');
-    html+=`<tr${isGoal?' class="goal-row"':''}>`;
-    
-    // Label cell
-    if(isGoal){
-      html+=`<td style="position:sticky;left:0;background:rgba(124,106,255,0.08);font-family:var(--mono);font-size:10px;color:var(--accent);font-weight:700;white-space:nowrap;border:1px solid var(--border)">${row.label}</td>`;
-    } else {
-      html+=`<td style="position:sticky;left:0;background:var(--surface);font-family:var(--mono);font-size:10px;color:var(--text3);border:1px solid var(--border);white-space:nowrap">${row.dayLabel||''}</td>`;
-    }
-    
-    // Week cells — only show relevant week's cell, others empty if day row
-    if(row.type==='day'){
-      for(let w=0;w<4;w++){
-        const active = row.weekIdx===w;
-        const val = active ? (row.cells[0]||'') : '';
-        if(active){
-          html+=`<td><textarea class="todo-cell-input" rows="2" data-ri="${ri}" data-ci="0" onchange="updateTodoCell(${ri},0,this.value)" onblur="updateTodoCell(${ri},0,this.value)">${val}</textarea></td>`;
-        } else {
-          html+=`<td style="background:var(--surface2);opacity:0.3"></td>`;
-        }
-      }
-    } else {
-      // Goal rows span or fill all 4 week columns
-      for(let ci=0;ci<4;ci++){
-        const val=row.cells[ci]||'';
-        html+=`<td><textarea class="todo-cell-input" rows="2" data-ri="${ri}" data-ci="${ci}" onchange="updateTodoCell(${ri},${ci},this.value)" onblur="updateTodoCell(${ri},${ci},this.value)">${val}</textarea></td>`;
-      }
-    }
-    
-    html+=`</tr>`;
+
+    const isGoal = row.type && row.type.includes('goal');
+    html += `<tr${isGoal ? ' class="goal-row"' : ''}>`;
+
+    // Left sticky cell
+    html += `<td style="position:sticky;left:0;background:${isGoal ? 'rgba(124,106,255,0.08)' : 'var(--surface)'};font-family:var(--mono);font-size:10px;color:${isGoal ? 'var(--accent)' : 'var(--text3)'};font-weight:${isGoal ? '700' : '400'};white-space:nowrap;border:1px solid var(--border)">${row.label || row.dayLabel || ''}</td>`;
+
+    // Single week cell
+    html += `<td style="border:1px solid var(--border)">
+      <textarea class="todo-cell-input" rows="2" data-ri="${ri}" data-ci="0" 
+        onchange="updateTodoCell(${ri},0,this.value)" 
+        onblur="updateTodoCell(${ri},0,this.value)">${row.cells[0] || ''}</textarea>
+    </td>`;
+
+    html += `</tr>`;
   });
-  
+
   document.getElementById('todoTable').innerHTML = html;
 }
 
-function updateTodoCell(ri,ci,val){
-  const data = state.todoData[currentSheetKey];
-  if(!data) return;
-  data.rows[ri].cells[ci] = val;
-  save();
-}
+    function updateTodoCell(ri, ci, val) {
+      const data = state.todoData[currentSheetKey];
+      if (!data) return;
+      data.rows[ri].cells[ci] = val;
+      save();
+    }
 
-function closeSheet(){
-  currentSheetKey=null;
-  renderTodoMonths();
-}
+    function closeSheet() {
+      currentSheetKey = null;
+      renderTodoMonths();
+    }
 
-// ============================================================
-// TAB 3: SOCIAL TRACKER
-// ============================================================
-const TT_TYPES = ['Video','Live','Duet','Stitch'];
-const YT_TYPES = ['Video','Short','Premiere','Live'];
-const IG_TYPES = ['Post','Reel','Story','Carousel'];
-const X_TYPES = ['Tweet','Thread','Space','Poll'];
-const APPS_INTERACT = ['TikTok','YouTube','Instagram','X'];
+    // ============================================================
+    // TAB 3: SOCIAL TRACKER
+    // ============================================================
+    const TT_TYPES = ['Video', 'Live', 'Duet', 'Stitch'];
+    const YT_TYPES = ['Video', 'Short', 'Premiere', 'Live'];
+    const IG_TYPES = ['Post', 'Reel', 'Story', 'Carousel'];
+    const X_TYPES = ['Tweet', 'Thread', 'Space', 'Poll'];
+    const APPS_INTERACT = ['TikTok', 'YouTube', 'Instagram', 'X'];
 
-function addSocialRow(pos='bottom'){
-  const row = {
-    id: uid(),
-    date: fmtDate(new Date()),
-    title: '',
-    tiktok: '', youtube: '', instagram: '', x: '',
-    interactions: [false,false,false,false]
-  };
-  if(pos==='top') state.socialRows.unshift(row);
-  else state.socialRows.push(row);
-  save(); renderSocial();
-}
+    function addSocialRow(pos = 'bottom') {
+      const row = {
+        id: uid(),
+        date: fmtDate(new Date()),
+        title: '',
+        tiktok: '', youtube: '', instagram: '', x: '',
+        interactions: [false, false, false, false]
+      };
+      if (pos === 'top') state.socialRows.unshift(row);
+      else state.socialRows.push(row);
+      save(); renderSocial();
+    }
 
-function renderSocial(){
-  const body = document.getElementById('socialBody');
-  if(!state.socialRows.length){
-    body.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="empty-icon">📱</div>No posts tracked yet. Add a row to get started.</div></td></tr>`;
-    return;
-  }
-  body.innerHTML = state.socialRows.map((row,ri)=>`
+    function renderSocial() {
+      const body = document.getElementById('socialBody');
+      if (!state.socialRows.length) {
+        body.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">📱</div>No posts tracked yet. Add a row to get started.</div></td></tr>`;
+        return;
+      }
+      body.innerHTML = state.socialRows.map((row, ri) => `
     <tr>
-      <td style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3)">${ri+1}</td>
+      <td style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3)">${ri + 1}</td>
       <td><input class="social-input social-date" type="date" value="${row.date}" onchange="updateSocial('${row.id}','date',this.value)"></td>
-      <td><input class="social-input" style="min-width:140px" type="text" placeholder="Content title..." value="${row.title||''}" onchange="updateSocial('${row.id}','title',this.value)"></td>
-      ${renderPlatformCell(row,'tiktok',TT_TYPES)}
-      ${renderPlatformCell(row,'youtube',YT_TYPES)}
-      ${renderPlatformCell(row,'instagram',IG_TYPES)}
-      ${renderPlatformCell(row,'x',X_TYPES)}
+      <td><input class="social-input" style="min-width:140px" type="text" placeholder="Content title..." value="${row.title || ''}" onchange="updateSocial('${row.id}','title',this.value)"></td>
+      ${renderPlatformCell(row, 'tiktok', TT_TYPES)}
+      ${renderPlatformCell(row, 'youtube', YT_TYPES)}
+      ${renderPlatformCell(row, 'instagram', IG_TYPES)}
+      ${renderPlatformCell(row, 'x', X_TYPES)}
       <td>
         <div class="check-group">
-          ${APPS_INTERACT.map((app,i)=>`
+          ${APPS_INTERACT.map((app, i) => `
             <label class="check-item">
-              <input type="checkbox" ${row.interactions[i]?'checked':''} onchange="updateInteraction('${row.id}',${i},this.checked)">
+              <input type="checkbox" ${row.interactions[i] ? 'checked' : ''} onchange="updateInteraction('${row.id}',${i},this.checked)">
               ${app}
             </label>
           `).join('')}
@@ -801,118 +1722,118 @@ function renderSocial(){
       </td>
     </tr>
   `).join('');
-}
+    }
 
-function renderPlatformCell(row,field,types){
-  const val = row[field]||'';
-  return `<td>
+    function renderPlatformCell(row, field, types) {
+      const val = row[field] || '';
+      return `<td>
     <div class="radio-group">
-      ${types.map(t=>`
+      ${types.map(t => `
         <label class="radio-item">
-          <input type="radio" name="${field}_${row.id}" value="${t}" ${val===t?'checked':''} onchange="updateSocial('${row.id}','${field}','${t}')">
+          <input type="radio" name="${field}_${row.id}" value="${t}" ${val === t ? 'checked' : ''} onchange="updateSocial('${row.id}','${field}','${t}')">
           ${t}
         </label>
       `).join('')}
     </div>
   </td>`;
-}
+    }
 
-function updateSocial(id,field,val){
-  const row = state.socialRows.find(r=>r.id===id);
-  if(row){ row[field]=val; save(); }
-}
-function updateInteraction(id,idx,val){
-  const row=state.socialRows.find(r=>r.id===id);
-  if(row){ row.interactions[idx]=val; save(); }
-}
-function deleteSocialRow(id){
-  state.socialRows=state.socialRows.filter(r=>r.id!==id);
-  save(); renderSocial();
-}
-function insertSocialRow(id,dir){
-  const idx=state.socialRows.findIndex(r=>r.id===id);
-  const row={id:uid(),date:fmtDate(new Date()),title:'',tiktok:'',youtube:'',instagram:'',x:'',interactions:[false,false,false,false]};
-  const insertAt = dir>0?idx+1:idx;
-  state.socialRows.splice(insertAt,0,row);
-  save(); renderSocial();
-}
+    function updateSocial(id, field, val) {
+      const row = state.socialRows.find(r => r.id === id);
+      if (row) { row[field] = val; save(); }
+    }
+    function updateInteraction(id, idx, val) {
+      const row = state.socialRows.find(r => r.id === id);
+      if (row) { row.interactions[idx] = val; save(); }
+    }
+    function deleteSocialRow(id) {
+      state.socialRows = state.socialRows.filter(r => r.id !== id);
+      save(); renderSocial();
+    }
+    function insertSocialRow(id, dir) {
+      const idx = state.socialRows.findIndex(r => r.id === id);
+      const row = { id: uid(), date: fmtDate(new Date()), title: '', tiktok: '', youtube: '', instagram: '', x: '', interactions: [false, false, false, false] };
+      const insertAt = dir > 0 ? idx + 1 : idx;
+      state.socialRows.splice(insertAt, 0, row);
+      save(); renderSocial();
+    }
 
-// ============================================================
-// TAB 4: FITNESS
-// ============================================================
-let fitnessDate = new Date();
-const DAY_TYPES = ['day','night','gym','lazy'];
-const DAY_TYPE_LABELS = ['🌅 Day Workout','🌙 Night','🏋️ Gym','😴 Lazy Day'];
+    // ============================================================
+    // TAB 4: FITNESS
+    // ============================================================
+    let fitnessDate = new Date();
+    const DAY_TYPES = ['day', 'night', 'gym', 'lazy'];
+    const DAY_TYPE_LABELS = ['🌅 Day Workout', '🌙 Night', '🏋️ Gym', '😴 Lazy Day'];
 
-function fitnessNav(d){ fitnessDate.setDate(fitnessDate.getDate()+d); renderFitness(); }
-function fitnessNavToday(){ fitnessDate=new Date(); renderFitness(); }
+    function fitnessNav(d) { fitnessDate.setDate(fitnessDate.getDate() + d); renderFitness(); }
+    function fitnessNavToday() { fitnessDate = new Date(); renderFitness(); }
 
-function getFitnessKey(){ return fmtDate(fitnessDate); }
+    function getFitnessKey() { return fmtDate(fitnessDate); }
 
-function getFitnessDay(){
-  const k=getFitnessKey();
-  if(!state.fitness[k]) state.fitness[k]={weight:'',dayType:'day',exercises:{day:[],night:[],gym:[]}};
-  return state.fitness[k];
-}
+    function getFitnessDay() {
+      const k = getFitnessKey();
+      if (!state.fitness[k]) state.fitness[k] = { weight: '', dayType: 'day', exercises: { day: [], night: [], gym: [] } };
+      return state.fitness[k];
+    }
 
-function saveFitnessData(){
-  const k=getFitnessKey();
-  const d=getFitnessDay();
-  d.weight=document.getElementById('weightInput').value;
-  save();
-}
+    function saveFitnessData() {
+      const k = getFitnessKey();
+      const d = getFitnessDay();
+      d.weight = document.getElementById('weightInput').value;
+      save();
+    }
 
-function renderFitness(){
-  const todayKey = fmtDate(today());
-  const todayData = state.fitness[todayKey] || {};
-  const yestKey = fmtDate(new Date(today().setDate(today().getDate()-1)));
-  const yestData = state.fitness[yestKey] || {};
-  
-  const delta = (todayData.weight||0) - (yestData.weight||0);
-  const span = document.getElementById('weightDelta');
-  span.textContent = delta>0 ? `↑${delta.toFixed(1)}kg` : delta<0 ? `↓${Math.abs(delta).toFixed(1)}kg` : '-';
-  span.style.color = delta>0 ? 'var(--danger)' : delta<0 ? 'var(--success)' : 'var(--text3)';
-  const k=getFitnessKey();
-  const d=getFitnessDay();
-  
-  document.getElementById('fitnessDateLabel').textContent = fitnessDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('weightInput').value = d.weight||'';
-  
-  // Day type selector
-  const sel=document.getElementById('dayTypeSelector');
-  sel.innerHTML=DAY_TYPES.map((t,i)=>`
-    <button class="day-type-btn ${d.dayType===t?'active '+t:''}" onclick="setDayType('${t}')">${DAY_TYPE_LABELS[i]}</button>
+    function renderFitness() {
+      const todayKey = fmtDate(today());
+      const todayData = state.fitness[todayKey] || {};
+      const yestKey = fmtDate(new Date(today().setDate(today().getDate() - 1)));
+      const yestData = state.fitness[yestKey] || {};
+
+      const delta = (todayData.weight || 0) - (yestData.weight || 0);
+      const span = document.getElementById('weightDelta');
+      span.textContent = delta > 0 ? `↑${delta.toFixed(1)}kg` : delta < 0 ? `↓${Math.abs(delta).toFixed(1)}kg` : '-';
+      span.style.color = delta > 0 ? 'var(--danger)' : delta < 0 ? 'var(--success)' : 'var(--text3)';
+      const k = getFitnessKey();
+      const d = getFitnessDay();
+
+      document.getElementById('fitnessDateLabel').textContent = fitnessDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      document.getElementById('weightInput').value = d.weight || '';
+
+      // Day type selector
+      const sel = document.getElementById('dayTypeSelector');
+      sel.innerHTML = DAY_TYPES.map((t, i) => `
+    <button class="day-type-btn ${d.dayType === t ? 'active ' + t : ''}" onclick="setDayType('${t}')">${DAY_TYPE_LABELS[i]}</button>
   `).join('');
-  
-  // Exercises per section
-  ['day','night','gym'].forEach(section=>{
-    const list=document.getElementById('exList_'+section);
-    const exs=d.exercises[section]||[];
-    list.innerHTML = exs.length ? exs.map((ex,i)=>`
+
+      // Exercises per section
+      ['day', 'night', 'gym'].forEach(section => {
+        const list = document.getElementById('exList_' + section);
+        const exs = d.exercises[section] || [];
+        list.innerHTML = exs.length ? exs.map((ex, i) => `
       <div class="exercise-item">
-        <input type="checkbox" ${ex.done?'checked':''} onchange="toggleExercise('${section}',${i},this.checked)">
-        <input class="exercise-name ${ex.done?'done':''}" value="${ex.name}" onchange="updateExerciseName('${section}',${i},this.value)" placeholder="Exercise name...">
-        <input style="width:90px;font-size:10px" placeholder="sets/reps" value="${ex.sets||''}" onchange="updateExerciseSets('${section}',${i},this.value)">
+        <input type="checkbox" ${ex.done ? 'checked' : ''} onchange="toggleExercise('${section}',${i},this.checked)">
+        <input class="exercise-name ${ex.done ? 'done' : ''}" value="${ex.name}" onchange="updateExerciseName('${section}',${i},this.value)" placeholder="Exercise name...">
+        <input style="width:90px;font-size:10px" placeholder="sets/reps" value="${ex.sets || ''}" onchange="updateExerciseSets('${section}',${i},this.value)">
         <button class="icon-btn" onclick="deleteExercise('${section}',${i})" style="color:var(--danger)">✕</button>
       </div>
     `).join('') : `<div style="font-family:var(--mono);font-size:10px;color:var(--text3);padding:8px 0">No exercises added</div>`;
-  });
-}
+      });
+    }
 
-function setDayType(t){
-  const d=getFitnessDay();
-  d.dayType=t;
-  save(); renderFitness();
-}
+    function setDayType(t) {
+      const d = getFitnessDay();
+      d.dayType = t;
+      save(); renderFitness();
+    }
 
-function openAddExercise(section='day'){
-  openModal(`
+    function openAddExercise(section = 'day') {
+      openModal(`
     <h3>Add Exercise</h3>
     <div class="modal-row"><label>Section</label>
       <select id="exSection">
-        <option value="day" ${section==='day'?'selected':''}>🌅 Day Workout</option>
-        <option value="night" ${section==='night'?'selected':''}>🌙 Night</option>
-        <option value="gym" ${section==='gym'?'selected':''}>🏋️ Gym</option>
+        <option value="day" ${section === 'day' ? 'selected' : ''}>🌅 Day Workout</option>
+        <option value="night" ${section === 'night' ? 'selected' : ''}>🌙 Night</option>
+        <option value="gym" ${section === 'gym' ? 'selected' : ''}>🏋️ Gym</option>
       </select>
     </div>
     <div class="modal-row"><label>Exercise Name</label><input id="exName" placeholder="e.g. Push-ups" autofocus></div>
@@ -922,104 +1843,104 @@ function openAddExercise(section='day'){
       <button class="btn primary" onclick="saveExercise()">Add</button>
     </div>
   `);
-  document.getElementById('exName').focus();
-}
+      document.getElementById('exName').focus();
+    }
 
-function saveExercise(){
-  const name=document.getElementById('exName').value.trim();
-  const sets=document.getElementById('exSets').value.trim();
-  const section=document.getElementById('exSection').value;
-  if(!name) return;
-  const d=getFitnessDay();
-  if(!d.exercises[section]) d.exercises[section]=[];
-  d.exercises[section].push({name,sets,done:false});
-  save(); closeModal(); renderFitness();
-}
+    function saveExercise() {
+      const name = document.getElementById('exName').value.trim();
+      const sets = document.getElementById('exSets').value.trim();
+      const section = document.getElementById('exSection').value;
+      if (!name) return;
+      const d = getFitnessDay();
+      if (!d.exercises[section]) d.exercises[section] = [];
+      d.exercises[section].push({ name, sets, done: false });
+      save(); closeModal(); renderFitness();
+    }
 
-function toggleExercise(section,i,val){
-  const d=getFitnessDay();
-  d.exercises[section][i].done=val;
-  save(); renderFitness();
-}
-function updateExerciseName(section,i,val){
-  const d=getFitnessDay();
-  d.exercises[section][i].name=val;
-  save();
-}
-function updateExerciseSets(section,i,val){
-  const d=getFitnessDay();
-  d.exercises[section][i].sets=val;
-  save();
-}
-function deleteExercise(section,i){
-  const d=getFitnessDay();
-  d.exercises[section].splice(i,1);
-  save(); renderFitness();
-}
+    function toggleExercise(section, i, val) {
+      const d = getFitnessDay();
+      d.exercises[section][i].done = val;
+      save(); renderFitness();
+    }
+    function updateExerciseName(section, i, val) {
+      const d = getFitnessDay();
+      d.exercises[section][i].name = val;
+      save();
+    }
+    function updateExerciseSets(section, i, val) {
+      const d = getFitnessDay();
+      d.exercises[section][i].sets = val;
+      save();
+    }
+    function deleteExercise(section, i) {
+      const d = getFitnessDay();
+      d.exercises[section].splice(i, 1);
+      save(); renderFitness();
+    }
 
-function duplicateFromDate(dateStr) {
-  const todayKey = fmtDate(today());
-  const sourceData = state.fitness[dateStr];
-  if(!sourceData) return alert("No data for this date");
-  
-  state.fitness[todayKey] = {
-    ...state.fitness[todayKey],
-    exercises: {
-      day: [...(sourceData.exercises.day||[])],
-      night: [...(sourceData.exercises.night||[])],
-      gym: [...(sourceData.exercises.gym||[])],
-    },
-    weight: state.fitness[todayKey]?.weight || 0,
-    dayType: state.fitness[todayKey]?.dayType || 'lazy',
-  };
-  save();
-  renderFitness();
-}
+    function duplicateFromDate(dateStr) {
+      const todayKey = fmtDate(today());
+      const sourceData = state.fitness[dateStr];
+      if (!sourceData) return alert("No data for this date");
 
-// ============================================================
-// TAB 5: APP DEV
-// ============================================================
-const STATUSES = ['Idea','Planning','Building','Launched','Paused','Cancelled'];
-const TYPES = ['Mobile App','Web App','Desktop App','Chrome Extension','API/Backend','Game','Tool/Utility','Other'];
-let appFilter = 'All';
-let appSearch = '';
+      state.fitness[todayKey] = {
+        ...state.fitness[todayKey],
+        exercises: {
+          day: [...(sourceData.exercises.day || [])],
+          night: [...(sourceData.exercises.night || [])],
+          gym: [...(sourceData.exercises.gym || [])],
+        },
+        weight: state.fitness[todayKey]?.weight || 0,
+        dayType: state.fitness[todayKey]?.dayType || 'lazy',
+      };
+      save();
+      renderFitness();
+    }
 
-function renderApps(){
-  // Filter pills
-  const filterDiv=document.getElementById('statusFilter');
-  filterDiv.innerHTML=['All',...STATUSES].map(s=>`
-    <button class="filter-pill ${appFilter===s?'active':''}" onclick="setAppFilter('${s}')">${s}</button>
+    // ============================================================
+    // TAB 5: APP DEV
+    // ============================================================
+    const STATUSES = ['Idea', 'Planning', 'Building', 'Launched', 'Paused', 'Cancelled'];
+    const TYPES = ['Mobile App', 'Web App', 'Desktop App', 'Chrome Extension', 'API/Backend', 'Game', 'Tool/Utility', 'Other'];
+    let appFilter = 'All';
+    let appSearch = '';
+
+    function renderApps() {
+      // Filter pills
+      const filterDiv = document.getElementById('statusFilter');
+      filterDiv.innerHTML = ['All', ...STATUSES].map(s => `
+    <button class="filter-pill ${appFilter === s ? 'active' : ''}" onclick="setAppFilter('${s}')">${s}</button>
   `).join('');
-  
-  // Table
-  let rows = state.apps;
-  if(appFilter!=='All') rows=rows.filter(a=>a.status===appFilter);
-  if(appSearch) rows=rows.filter(a=>(a.name+a.desc+a.info).toLowerCase().includes(appSearch));
-  
-  const body=document.getElementById('appsBody');
-  if(!rows.length){
-    body.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-icon">🚀</div>No apps tracked yet. Add your first idea!</div></td></tr>`;
-    return;
-  }
-  
-  body.innerHTML=rows.map((app,i)=>{
-    const sc=app.status.toLowerCase();
-    return `<tr>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center">${i+1}</td>
-      <td><input class="apps-input" style="font-weight:700" value="${app.name||''}" placeholder="App name..." onchange="updateApp('${app.id}','name',this.value)"></td>
-      <td><input class="apps-input" value="${app.desc||''}" placeholder="What does it do?" onchange="updateApp('${app.id}','desc',this.value)"></td>
+
+      // Table
+      let rows = state.apps;
+      if (appFilter !== 'All') rows = rows.filter(a => a.status === appFilter);
+      if (appSearch) rows = rows.filter(a => (a.name + a.desc + a.info).toLowerCase().includes(appSearch));
+
+      const body = document.getElementById('appsBody');
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">🚀</div>No apps tracked yet. Add your first idea!</div></td></tr>`;
+        return;
+      }
+
+      body.innerHTML = rows.map((app, i) => {
+        const sc = app.status.toLowerCase();
+        return `<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center">${i + 1}</td>
+      <td><input class="apps-input" style="font-weight:700" value="${app.name || ''}" placeholder="App name..." onchange="updateApp('${app.id}','name',this.value)"></td>
+      <td><input class="apps-input" value="${app.desc || ''}" placeholder="What does it do?" onchange="updateApp('${app.id}','desc',this.value)"></td>
       <td>
         <select style="background:var(--surface2);border-color:var(--border);color:var(--text);font-family:var(--mono);font-size:11px;width:100%" onchange="updateApp('${app.id}','status',this.value)">
-          ${STATUSES.map(s=>`<option value="${s}" ${app.status===s?'selected':''}>${s}</option>`).join('')}
+          ${STATUSES.map(s => `<option value="${s}" ${app.status === s ? 'selected' : ''}>${s}</option>`).join('')}
         </select>
       </td>
       <td>
         <select style="background:var(--surface2);border-color:var(--border);color:var(--text);font-family:var(--mono);font-size:11px;width:100%" onchange="updateApp('${app.id}','type',this.value)">
-          ${TYPES.map(t=>`<option value="${t}" ${app.type===t?'selected':''}>${t}</option>`).join('')}
+          ${TYPES.map(t => `<option value="${t}" ${app.type === t ? 'selected' : ''}>${t}</option>`).join('')}
         </select>
       </td>
-      <td><input class="apps-input" value="${app.info||''}" placeholder="Notes, links, tech stack..." onchange="updateApp('${app.id}','info',this.value)"></td>
-      <td><input class="apps-input deadline-input" type="date" value="${app.deadline||''}" onchange="updateApp('${app.id}','deadline',this.value)"></td>
+      <td><input class="apps-input" value="${app.info || ''}" placeholder="Notes, links, tech stack..." onchange="updateApp('${app.id}','info',this.value)"></td>
+      <td><input class="apps-input deadline-input" type="date" value="${app.deadline || ''}" onchange="updateApp('${app.id}','deadline',this.value)"></td>
       <td>
         <div class="row-actions">
           <button class="icon-btn" onclick="duplicateApp('${app.id}')" title="Duplicate">⊕</button>
@@ -1027,22 +1948,22 @@ function renderApps(){
         </div>
       </td>
     </tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-function setAppFilter(f){ appFilter=f; renderApps(); }
-function filterApps(q){ appSearch=q.toLowerCase(); renderApps(); }
+    function setAppFilter(f) { appFilter = f; renderApps(); }
+    function filterApps(q) { appSearch = q.toLowerCase(); renderApps(); }
 
-function openAddApp(){
-  openModal(`
+    function openAddApp() {
+      openModal(`
     <h3>New App Idea</h3>
     <div class="modal-row"><label>App Name</label><input id="appName" placeholder="My awesome app" autofocus></div>
     <div class="modal-row"><label>Description</label><input id="appDesc" placeholder="What does it do?"></div>
     <div class="modal-row"><label>Status</label>
-      <select id="appStatus">${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="appStatus">${STATUSES.map(s => `<option>${s}</option>`).join('')}</select>
     </div>
     <div class="modal-row"><label>Type</label>
-      <select id="appType">${TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
+      <select id="appType">${TYPES.map(t => `<option>${t}</option>`).join('')}</select>
     </div>
     <div class="modal-row"><label>Additional Info</label><input id="appInfo" placeholder="Notes, links, tech stack..."></div>
     <div class="modal-row"><label>Deadline</label><input id="appDeadline" type="date"></div>
@@ -1051,48 +1972,49 @@ function openAddApp(){
       <button class="btn primary" onclick="saveApp()">Add App</button>
     </div>
   `);
-  document.getElementById('appName').focus();
-}
+      document.getElementById('appName').focus();
+    }
 
-function saveApp(){
-  const name=document.getElementById('appName').value.trim();
-  if(!name) return;
-  state.apps.push({
-    id:uid(),
-    name,
-    desc:document.getElementById('appDesc').value,
-    status:document.getElementById('appStatus').value,
-    type:document.getElementById('appType').value,
-    info:document.getElementById('appInfo').value,
-    deadline:document.getElementById('appDeadline').value
-  });
-  save(); closeModal(); renderApps();
-}
+    function saveApp() {
+      const name = document.getElementById('appName').value.trim();
+      if (!name) return;
+      state.apps.push({
+        id: uid(),
+        name,
+        desc: document.getElementById('appDesc').value,
+        status: document.getElementById('appStatus').value,
+        type: document.getElementById('appType').value,
+        info: document.getElementById('appInfo').value,
+        deadline: document.getElementById('appDeadline').value
+      });
+      save(); closeModal(); renderApps();
+    }
 
-function updateApp(id,field,val){
-  const app=state.apps.find(a=>a.id===id);
-  if(app){ app[field]=val; save(); }
-}
-function deleteApp(id){
-  if(confirm('Delete this app?')){ state.apps=state.apps.filter(a=>a.id!==id); save(); renderApps(); }
-}
-function duplicateApp(id){
-  const app=state.apps.find(a=>a.id===id);
-  if(app){ state.apps.push({...app,id:uid(),name:app.name+' (copy)'}); save(); renderApps(); }
-}
+    function updateApp(id, field, val) {
+      const app = state.apps.find(a => a.id === id);
+      if (app) { app[field] = val; save(); }
+    }
+    function deleteApp(id) {
+      if (confirm('Delete this app?')) { state.apps = state.apps.filter(a => a.id !== id); save(); renderApps(); }
+    }
+    function duplicateApp(id) {
+      const app = state.apps.find(a => a.id === id);
+      if (app) { state.apps.push({ ...app, id: uid(), name: app.name + ' (copy)' }); save(); renderApps(); }
+    }
 
-// ============================================================
-// INIT
-// ============================================================
-load();
-updateHeaderDate();
-setInterval(updateHeaderDate, 60000);
-renderCal();
-renderTodoMonths();
-// Add 1 social row if none exist
-if(!state.socialRows.length) addSocialRow('bottom');
-else renderSocial();
-renderApps();
-</script>
+    // ============================================================
+    // INIT
+    // ============================================================
+    load();
+    updateHeaderDate();
+    setInterval(updateHeaderDate, 60000);
+    renderCal();
+    renderTodoMonths();
+    // Add 1 social row if none exist
+    if (!state.socialRows.length) addSocialRow('bottom');
+    else renderSocial();
+    renderApps();
+  </script>
 </body>
+
 </html>
