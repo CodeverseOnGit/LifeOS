@@ -1136,8 +1136,11 @@
     <div class="header">
       <div class="logo">Life<span>OS</span></div>
       <!-- Put this somewhere visible in your page -->
-<button id="saveCloudBtn">Save to Local Repo</button>
+<button id="saveCloudBtn">Save</button>
       <span id="saveStatus"></span>
+<button id="loadJsonBtn">Load JSON</button>
+<input type="file" id="jsonFileInput" accept=".json" style="display:none">
+
       <div class="date-badge" id="headerDate"></div>
     </div>
 
@@ -1361,6 +1364,39 @@
       const d = today();
       document.getElementById('headerDate').textContent = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     }
+    document.getElementById('loadJsonBtn').onclick = () => {
+  document.getElementById('jsonFileInput').click();
+};
+
+document.getElementById('jsonFileInput').onchange = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      // Replace state with loaded JSON
+      state = data;
+
+      // Save to localStorage
+      save();
+
+      // Re-render all tabs
+      renderCal();
+      renderTodoMonths();
+      renderSocial();
+      renderFitness();
+      renderApps();
+
+      alert('JSON loaded successfully!');
+    } catch (err) {
+      alert('Error parsing JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+};
 
     // ============================================================
     // TAB 1: CALENDAR
