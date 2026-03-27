@@ -1,25 +1,48 @@
 name: Daily JSON Backup
 
+# Run every day at midnight UTC
 on:
   schedule:
-    - cron: "0 21 * * *"   # midnight Qatar
-  workflow_dispatch:
+    - cron: '0 0 * * *'
 
 jobs:
   backup:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      # 1. Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Run backup script
-        run: node backup.js
+      # 2. Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
+      # 3. Install dependencies (if you need crypto or other packages)
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Encrypt JSON
+      - name: Encrypt data.json
+        run: |
+          node -e "
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const data = JSON.parse(fs.readFileSync('data.json', 'utf-8'));
+          const key = crypto.scryptSync('super-secret-password', 'salt', 32);
+          const iv = crypto.randomBytes(16);
+          const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+          const encrypted = Buffer.concat([cipher.update(JSON.stringify(data)), cipher.final()]);
+          fs.writeFileSync('data.enc.json', iv.toString('hex') + ':' + encrypted.toString('hex'));
+          "
+
+      # 5. Commit and push encrypted JSON
       - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add .
-          git commit -m "Auto backup $(date)" || echo "No changes"
-          git push
+          git add data.enc.json
+          git commit -m "Daily encrypted backup $(date +'%Y-%m-%d')" || echo "No changes"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
