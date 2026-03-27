@@ -1,5 +1,4 @@
-name: Daily Live Backup
-
+name: Backup JSON
 on:
   schedule:
     - cron: '0 0 * * *' # every midnight UTC
@@ -9,48 +8,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repo
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      # 2. Install Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # 3. Install dependencies (for https fetch if needed)
-      - name: Install node-fetch
-        run: npm install node-fetch@3
-
-      # 4. Fetch live data.json and encrypt it
-      - name: Fetch and encrypt data.json
-        run: |
-          node -e "
-          import fs from 'fs';
-          import fetch from 'node-fetch';
-          import crypto from 'crypto';
-
-          // Replace with your Netlify URL where data.json is hosted
-          const url = 'https://your-app.netlify.app/data.json';
-
-          const res = await fetch(url);
-          if (!res.ok) throw new Error('Failed to fetch data.json');
-          const data = await res.json();
-
-          const key = crypto.scryptSync('super-secret-password', 'salt', 32);
-          const iv = crypto.randomBytes(16);
-          const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-          const encrypted = Buffer.concat([cipher.update(JSON.stringify(data)), cipher.final()]);
-          fs.writeFileSync('data.enc.json', iv.toString('hex') + ':' + encrypted.toString('hex'));
-          console.log('data.enc.json updated successfully');
-          "
-
-      # 5. Commit and push
-      - name: Commit and push encrypted backup
+      - name: Commit updated JSON
         run: |
           git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add data.enc.json
-          git commit -m "Auto backup $(date +'%Y-%m-%d')" || echo "No changes"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+          git config user.email "github-actions@github.com"
+          git add data.json
+          git diff --cached --quiet || git commit -m "Auto backup JSON"
+          git push
