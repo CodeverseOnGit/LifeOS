@@ -1137,23 +1137,20 @@
       <div class="logo">Life<span>OS</span></div>
       <button id="saveLocalBtn">Save to Repo</button>
 <script>
-  const saveLocalBtn = document.getElementById('saveLocalBtn');
-
-  saveLocalBtn.addEventListener('click', () => {
-    // Grab your app state
-    const data = window.state.todoData; 
-
-    // Create a Blob and trigger download
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  function saveToLocalRepo() {
+    // Generate JSON file from your app state
+    const blob = new Blob([JSON.stringify(window.state.todoData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'data.json';
+    a.download = 'data.json'; // User should save inside repo folder
     a.click();
     URL.revokeObjectURL(url);
 
-    alert('data.json downloaded! Place it in your repo folder for GitHub Actions.');
-  });
+    alert('data.json generated! Save it in your repo folder for nightly backup.');
+  }
+
+  document.getElementById('saveCloudBtn').onclick = saveToLocalRepo;
 </script>
       <span id="saveStatus"></span>
       <div class="date-badge" id="headerDate"></div>
