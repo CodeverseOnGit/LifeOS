@@ -1135,7 +1135,6 @@
 
     <div class="header">
       <div class="logo">Life<span>OS</span></div>
-      <!-- Put this somewhere visible in your page -->
 <button id="saveCloudBtn">Save</button>
       <span id="saveStatus"></span>
 <button id="loadJsonBtn">Load JSON</button>
@@ -1624,20 +1623,42 @@ function buildDefaultRows(year, month) {
 
   for (let d = 1; d <= numDays; d++) {
     rows.push({
-      // Remove dayLabel entirely so day numbers are not shown
-      label: '',  
+      label: d.toString(),   // ✅ keep DATE visible
       cells: ['']
     });
 
-    // Add goal row every 7 days
+    // Week goal every 7 days
     if (d % 7 === 0) {
       rows.push({
-        label: `Week ${Math.ceil(d/7)} Goal`,
+        label: `Week ${Math.ceil(d / 7)} Goal`,
         cells: [''],
         type: 'goal'
       });
     }
   }
+
+  // ✅ ADD THESE BACK (this is what you lost)
+
+  // Month goal
+  rows.push({
+    label: '📅 Month Goal',
+    cells: [''],
+    type: 'goal'
+  });
+
+  // Quarter goal
+  rows.push({
+    label: `📊 Q${Math.floor(month / 3) + 1} Goal`,
+    cells: [''],
+    type: 'goal'
+  });
+
+  // Year goal
+  rows.push({
+    label: `🎯 Year ${year} Goal`,
+    cells: [''],
+    type: 'goal'
+  });
 
   return rows;
 }
