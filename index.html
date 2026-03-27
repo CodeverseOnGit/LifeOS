@@ -1135,23 +1135,8 @@
 
     <div class="header">
       <div class="logo">Life<span>OS</span></div>
-      <button id="saveLocalBtn">Save to Repo</button>
-<script>
-  function saveToLocalRepo() {
-    // Generate JSON file from your app state
-    const blob = new Blob([JSON.stringify(window.state.todoData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'data.json'; // User should save inside repo folder
-    a.click();
-    URL.revokeObjectURL(url);
-
-    alert('data.json generated! Save it in your repo folder for nightly backup.');
-  }
-
-  document.getElementById('saveCloudBtn').onclick = saveToLocalRepo;
-</script>
+      <!-- Put this somewhere visible in your page -->
+<button id="saveCloudBtn">Save to Local Repo</button>
       <span id="saveStatus"></span>
       <div class="date-badge" id="headerDate"></div>
     </div>
@@ -2019,7 +2004,41 @@ function buildDefaultRows(year, month) {
     if (!state.socialRows.length) addSocialRow('bottom');
     else renderSocial();
     renderApps();
+    
   </script>
+<script>
+  // Ensure DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const btn = document.getElementById('saveCloudBtn');
+    if (!btn) return console.error('Save button not found');
+
+    btn.addEventListener('click', () => {
+      try {
+        // Create a JSON blob of your app state
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary <a> to trigger download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Cleanup
+        URL.revokeObjectURL(url);
+
+        alert('data.json generated! Save it in your repo folder for nightly backup.');
+      } catch (err) {
+        console.error('Error saving data:', err);
+        alert('Failed to save data. Check console.');
+      }
+    });
+
+  });
+</script>
 </body>
 
 </html>
