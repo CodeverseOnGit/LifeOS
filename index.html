@@ -1135,7 +1135,26 @@
 
     <div class="header">
       <div class="logo">Life<span>OS</span></div>
-      <button id="saveCloudBtn">💾 Save to Cloud</button>
+      <button id="saveLocalBtn">Save to Repo</button>
+<script>
+  const saveLocalBtn = document.getElementById('saveLocalBtn');
+
+  saveLocalBtn.addEventListener('click', () => {
+    // Grab your app state
+    const data = window.state.todoData; 
+
+    // Create a Blob and trigger download
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    alert('data.json downloaded! Place it in your repo folder for GitHub Actions.');
+  });
+</script>
       <span id="saveStatus"></span>
       <div class="date-badge" id="headerDate"></div>
     </div>
@@ -1375,30 +1394,6 @@
       document.getElementById('weekModeBtn').classList.toggle('active', m === 'week');
       renderCal();
     }
-
-    document.getElementById('saveCloudBtn').addEventListener('click', async () => {
-  const data = state.todoData; // your existing JSON
-  const status = document.getElementById('saveStatus');
-  status.textContent = 'Saving...';
-
-  try {
-    const res = await fetch('/.netlify/functions/saveData', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      status.textContent = 'Saved to Cloud ✅';
-    } else {
-      status.textContent = 'Error saving ⚠️';
-      console.error('Save failed:', await res.text());
-    }
-  } catch (err) {
-    status.textContent = 'Error saving ⚠️';
-    console.error(err);
-  }
-});
 
     function calNav(d) {
       if (calMode === 'day') calDate.setDate(calDate.getDate() + d);
