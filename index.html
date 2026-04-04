@@ -31,6 +31,26 @@
       --sans: 'Syne', sans-serif;
     }
 
+    :root.light-mode {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f0f3;
+      --surface3: #e8e8ed;
+      --border: #d0d0d8;
+      --border2: #c0c0c8;
+      --accent: #7c6aff;
+      --accent2: #ff6a9e;
+      --accent3: #6affb8;
+      --accent4: #ffb86a;
+      --text: #1a1a1f;
+      --text2: #5a5a68;
+      --text3: #9090a0;
+      --danger: #ff4466;
+      --success: #44ff88;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -77,7 +97,7 @@
     .header {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 12px;
       padding: 0 24px;
       height: 56px;
       background: var(--surface);
@@ -85,6 +105,49 @@
       flex-shrink: 0;
       position: relative;
       z-index: 100
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .header-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text2);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s
+    }
+
+    .header-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .mode-toggle {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 5px 10px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text2);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+      margin-left: auto
+    }
+
+    .mode-toggle:hover {
+      border-color: var(--accent3);
+      color: var(--accent3)
     }
 
     .logo {
@@ -685,31 +748,32 @@
     .streak-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 10px 8px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      min-width: 160px;
+      gap: 6px;
+      min-width: 120px;
       align-items: center;
       flex-shrink: 0
     }
 
     .streak-icon {
-      font-size: 32px
+      font-size: 20px
     }
 
     .streak-label {
       font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 1px;
+      font-size: 9px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       color: var(--text3);
-      text-align: center
+      text-align: center;
+      line-height: 1.2
     }
 
     .streak-counter {
-      font-size: 28px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--accent);
       font-family: var(--mono);
@@ -720,12 +784,12 @@
       background: var(--accent);
       border: none;
       color: #fff;
-      padding: 6px 14px;
-      border-radius: 4px;
+      padding: 4px 8px;
+      border-radius: 3px;
       cursor: pointer;
       font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 1px;
+      font-size: 9px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       font-weight: 700;
       transition: background 0.15s
@@ -733,6 +797,24 @@
 
     .streak-button:hover {
       background: #6a58e8
+    }
+
+    .streak-reset-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text3);
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.5px;
+      transition: all 0.15s
+    }
+
+    .streak-reset-btn:hover {
+      border-color: var(--danger);
+      color: var(--danger)
     }
 
     /* ==================== TAB 5: APPS ==================== */
@@ -790,11 +872,13 @@
 
     <div class="header">
       <div class="logo">Life<span>OS</span></div>
-<button id="saveCloudBtn">Save</button>
-      <span id="saveStatus"></span>
-<button id="loadJsonBtn">Load JSON</button>
-<input type="file" id="jsonFileInput" accept=".json" style="display:none">
-
+      <div class="header-controls">
+        <button id="saveCloudBtn" class="header-btn">💾 Save</button>
+        <span id="saveStatus"></span>
+        <button id="loadJsonBtn" class="header-btn">📂 Load JSON</button>
+        <input type="file" id="jsonFileInput" accept=".json" style="display:none">
+        <button id="modeToggle" class="mode-toggle">🌙 Dark</button>
+      </div>
       <div class="date-badge" id="headerDate"></div>
     </div>
 
@@ -1461,18 +1545,21 @@ function buildDefaultRows(year, month) {
       <div class="streak-label">Non-Sweet Days</div>
       <div class="streak-counter">${d.nonSweetDays || 0}</div>
       <button class="streak-button" onclick="incrementStreak('nonSweetDays')">+1 Day</button>
+      <button class="streak-reset-btn" onclick="resetStreak('nonSweetDays')">Reset</button>
     </div>
     <div class="streak-card">
       <div class="streak-icon">🍵</div>
       <div class="streak-label">Green Tea</div>
       <div class="streak-counter">${d.greenTeaDays || 0}</div>
       <button class="streak-button" onclick="incrementStreak('greenTeaDays')">+1 Day</button>
+      <button class="streak-reset-btn" onclick="resetStreak('greenTeaDays')">Reset</button>
     </div>
     <div class="streak-card">
       <div class="streak-icon">☕</div>
       <div class="streak-label">Black Coffee</div>
       <div class="streak-counter">${d.blackCoffeeDays || 0}</div>
       <button class="streak-button" onclick="incrementStreak('blackCoffeeDays')">+1 Day</button>
+      <button class="streak-reset-btn" onclick="resetStreak('blackCoffeeDays')">Reset</button>
     </div>
   `;
 
@@ -1501,6 +1588,12 @@ function buildDefaultRows(year, month) {
       const d = getFitnessDay();
       if (d[streakType] === undefined) d[streakType] = 0;
       d[streakType] += 1;
+      save(); renderFitness();
+    }
+
+    function resetStreak(streakType) {
+      const d = getFitnessDay();
+      d[streakType] = 0;
       save(); renderFitness();
     }
 
@@ -1731,6 +1824,24 @@ function buildDefaultRows(year, month) {
         alert('Failed to save data. Check console.');
       }
     });
+
+    // Light mode toggle
+    const modeToggle = document.getElementById('modeToggle');
+    if (modeToggle) {
+      // Check localStorage for saved mode
+      const savedMode = localStorage.getItem('lifeOS_mode') || 'dark';
+      if (savedMode === 'light') {
+        document.documentElement.classList.add('light-mode');
+        modeToggle.textContent = '☀️ Light';
+      }
+
+      modeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('light-mode');
+        const isLight = document.documentElement.classList.contains('light-mode');
+        localStorage.setItem('lifeOS_mode', isLight ? 'light' : 'dark');
+        modeToggle.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+      });
+    }
 
   });
 </script>
