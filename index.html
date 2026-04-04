@@ -672,6 +672,69 @@
       margin-top: 4px
     }
 
+    /* ==================== STREAKS ==================== */
+    .streak-container {
+      display: flex;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+      overflow-x: auto;
+      padding: 8px 0
+    }
+
+    .streak-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 160px;
+      align-items: center;
+      flex-shrink: 0
+    }
+
+    .streak-icon {
+      font-size: 32px
+    }
+
+    .streak-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text3);
+      text-align: center
+    }
+
+    .streak-counter {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: var(--mono);
+      text-align: center
+    }
+
+    .streak-button {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+      transition: background 0.15s
+    }
+
+    .streak-button:hover {
+      background: #6a58e8
+    }
+
     /* ==================== TAB 5: APPS ==================== */
     .apps-controls {
       display: flex;
@@ -785,10 +848,10 @@
             <span id="weightDelta" style="font-size:10px;margin-left:8px;color:var(--text3)"></span>
           </div>
           <div class="day-type-selector" id="dayTypeSelector"></div>
-          <button class="btn small pink" onclick="duplicateFromDate(prompt('Enter date (YYYY-MM-DD)'))">Duplicate From
-            Date</button>
+          <button class="btn small pink" onclick="duplicateFromDate(prompt('Enter date (YYYY-MM-DD)'))">Duplicate From Date</button>
           <button class="btn primary small" onclick="openAddExercise()">+ Exercise</button>
         </div>
+        <div class="streak-container" id="streakContainer" style="flex:1;min-height:0;overflow-y:hidden"></div>
         <div class="exercise-sections" id="exerciseSections" style="flex:1;min-height:0;overflow-y:auto;overflow-x:auto">
           <div class="exercise-section">
             <div class="exercise-section-title" style="color:var(--accent)">🌅 Day Workout</div>
@@ -1326,8 +1389,8 @@ function buildDefaultRows(year, month) {
     // TAB 4: FITNESS
     // ============================================================
     let fitnessDate = new Date();
-    const DAY_TYPES = ['day', 'night', 'gym', 'lazy'];
-    const DAY_TYPE_LABELS = ['🌅 Day Workout', '🌙 Night', '🏋️ Gym', '😴 Lazy Day'];
+    const DAY_TYPES = ['lazy'];
+    const DAY_TYPE_LABELS = ['😴 Lazy Day'];
 
     function fitnessNav(d) { fitnessDate.setDate(fitnessDate.getDate() + d); renderFitness(); }
     function fitnessNavToday() { fitnessDate = new Date(); renderFitness(); }
@@ -1339,10 +1402,17 @@ function buildDefaultRows(year, month) {
       if (!state.fitness[k]) {
         state.fitness[k] = {
           weight: '',
-          dayType: 'day',
-          exercises: { day: Array.isArray([]) ? [] : [], night: Array.isArray([]) ? [] : [], gym: Array.isArray([]) ? [] : [] }
+          dayType: 'lazy',
+          nonSweetDays: 0,
+          greenTeaDays: 0,
+          blackCoffeeDays: 0,
+          exercises: { day: [], night: [], gym: [] }
         };
       }
+      // Ensure new properties exist for old data
+      if (state.fitness[k].nonSweetDays === undefined) state.fitness[k].nonSweetDays = 0;
+      if (state.fitness[k].greenTeaDays === undefined) state.fitness[k].greenTeaDays = 0;
+      if (state.fitness[k].blackCoffeeDays === undefined) state.fitness[k].blackCoffeeDays = 0;
       return state.fitness[k];
     }
 
@@ -1383,6 +1453,29 @@ function buildDefaultRows(year, month) {
     <button class="day-type-btn ${d.dayType === t ? 'active ' + t : ''}" onclick="setDayType('${t}')">${DAY_TYPE_LABELS[i]}</button>
   `).join('');
 
+      // Streak cards
+      const streakContainer = document.getElementById('streakContainer');
+      streakContainer.innerHTML = `
+    <div class="streak-card">
+      <div class="streak-icon">🚫🍬</div>
+      <div class="streak-label">Non-Sweet Days</div>
+      <div class="streak-counter">${d.nonSweetDays || 0}</div>
+      <button class="streak-button" onclick="incrementStreak('nonSweetDays')">+1 Day</button>
+    </div>
+    <div class="streak-card">
+      <div class="streak-icon">🍵</div>
+      <div class="streak-label">Green Tea</div>
+      <div class="streak-counter">${d.greenTeaDays || 0}</div>
+      <button class="streak-button" onclick="incrementStreak('greenTeaDays')">+1 Day</button>
+    </div>
+    <div class="streak-card">
+      <div class="streak-icon">☕</div>
+      <div class="streak-label">Black Coffee</div>
+      <div class="streak-counter">${d.blackCoffeeDays || 0}</div>
+      <button class="streak-button" onclick="incrementStreak('blackCoffeeDays')">+1 Day</button>
+    </div>
+  `;
+
       // Exercises per section
       ['day', 'night', 'gym'].forEach(section => {
         const list = document.getElementById('exList_' + section);
@@ -1401,6 +1494,13 @@ function buildDefaultRows(year, month) {
     function setDayType(t) {
       const d = getFitnessDay();
       d.dayType = t;
+      save(); renderFitness();
+    }
+
+    function incrementStreak(streakType) {
+      const d = getFitnessDay();
+      if (d[streakType] === undefined) d[streakType] = 0;
+      d[streakType] += 1;
       save(); renderFitness();
     }
 
