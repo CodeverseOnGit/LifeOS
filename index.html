@@ -508,7 +508,8 @@
       display: grid;
       grid-template-columns: auto 1fr;
       gap: 16px;
-      align-items: start
+      align-items: start;
+      flex-shrink: 0
     }
 
     .fitness-date-nav {
@@ -516,7 +517,8 @@
       align-items: center;
       gap: 8px;
       font-family: var(--mono);
-      font-size: 12px
+      font-size: 12px;
+      flex-shrink: 0
     }
 
     .weight-badge {
@@ -595,7 +597,10 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
-      flex: 1
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: auto
     }
 
     .exercise-section {
@@ -765,8 +770,8 @@
       </div>
 
       <!-- ========== TAB 2: FITNESS ========== -->
-      <div class="tab-panel" id="tab1">
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="tab-panel" id="tab1" style="flex-direction:column;gap:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;flex-shrink:0">
           <div class="fitness-date-nav">
             <button class="btn small" onclick="fitnessNav(-1)">‹</button>
             <span id="fitnessDateLabel" style="min-width:120px;text-align:center"></span>
@@ -784,7 +789,7 @@
             Date</button>
           <button class="btn primary small" onclick="openAddExercise()">+ Exercise</button>
         </div>
-        <div class="exercise-sections" id="exerciseSections">
+        <div class="exercise-sections" id="exerciseSections" style="flex:1;min-height:0;overflow-y:auto;overflow-x:auto">
           <div class="exercise-section">
             <div class="exercise-section-title" style="color:var(--accent)">🌅 Day Workout</div>
             <div id="exList_day"></div>
@@ -1331,29 +1336,43 @@ function buildDefaultRows(year, month) {
 
     function getFitnessDay() {
       const k = getFitnessKey();
-      if (!state.fitness[k]) state.fitness[k] = { weight: '', dayType: 'day', exercises: { day: [], night: [], gym: [] } };
+      if (!state.fitness[k]) {
+        state.fitness[k] = {
+          weight: '',
+          dayType: 'day',
+          exercises: { day: Array.isArray([]) ? [] : [], night: Array.isArray([]) ? [] : [], gym: Array.isArray([]) ? [] : [] }
+        };
+      }
       return state.fitness[k];
     }
 
     function saveFitnessData() {
       const k = getFitnessKey();
       const d = getFitnessDay();
-      d.weight = document.getElementById('weightInput').value;
+      const weightVal = document.getElementById('weightInput').value;
+      d.weight = weightVal ? weightVal.toString() : '';
       save();
+      renderFitness();
     }
 
     function renderFitness() {
-      const todayKey = fmtDate(today());
-      const todayData = state.fitness[todayKey] || {};
-      const yestKey = fmtDate(new Date(today().setDate(today().getDate() - 1)));
-      const yestData = state.fitness[yestKey] || {};
-
-      const delta = (todayData.weight || 0) - (yestData.weight || 0);
+      const k = getFitnessKey();
+      const d = getFitnessDay();
+      const currentData = state.fitness[k] || {};
+      
+      // Calculate weight delta for current viewing date
+      const prevDate = new Date(fitnessDate);
+      prevDate.setDate(prevDate.getDate() - 1);
+      const prevKey = fmtDate(prevDate);
+      const prevData = state.fitness[prevKey] || {};
+      
+      const currentWeight = parseFloat(currentData.weight) || 0;
+      const prevWeight = parseFloat(prevData.weight) || 0;
+      const delta = currentData.weight && prevData.weight ? (currentWeight - prevWeight) : 0;
+      
       const span = document.getElementById('weightDelta');
       span.textContent = delta > 0 ? `↑${delta.toFixed(1)}kg` : delta < 0 ? `↓${Math.abs(delta).toFixed(1)}kg` : '-';
       span.style.color = delta > 0 ? 'var(--danger)' : delta < 0 ? 'var(--success)' : 'var(--text3)';
-      const k = getFitnessKey();
-      const d = getFitnessDay();
 
       document.getElementById('fitnessDateLabel').textContent = fitnessDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
       document.getElementById('weightInput').value = d.weight || '';
@@ -1411,8 +1430,10 @@ function buildDefaultRows(year, month) {
       const section = document.getElementById('exSection').value;
       if (!name) return;
       const d = getFitnessDay();
-      if (!d.exercises[section]) d.exercises[section] = [];
-      d.exercises[section].push({ name, sets, done: false });
+      if (!Array.isArray(d.exercises[section])) {
+        d.exercises[section] = [];
+      }
+      d.exercises[section].push({ name, sets: sets || '', done: false });
       save(); closeModal(); renderFitness();
     }
 
@@ -1438,20 +1459,27 @@ function buildDefaultRows(year, month) {
     }
 
     function duplicateFromDate(dateStr) {
-      const todayKey = fmtDate(today());
+      if (!dateStr || dateStr.trim() === '') return;
       const sourceData = state.fitness[dateStr];
-      if (!sourceData) return alert("No data for this date");
+      if (!sourceData) return alert("No data for date: " + dateStr);
 
-      state.fitness[todayKey] = {
-        ...state.fitness[todayKey],
-        exercises: {
-          day: [...(sourceData.exercises.day || [])],
-          night: [...(sourceData.exercises.night || [])],
-          gym: [...(sourceData.exercises.gym || [])],
-        },
-        weight: state.fitness[todayKey]?.weight || 0,
-        dayType: state.fitness[todayKey]?.dayType || 'lazy',
+      const targetKey = getFitnessKey();
+      const targetData = getFitnessDay();
+      
+      // Deep copy exercises to prevent reference sharing
+      targetData.exercises = {
+        day: sourceData.exercises.day ? sourceData.exercises.day.map(ex => ({ ...ex })) : [],
+        night: sourceData.exercises.night ? sourceData.exercises.night.map(ex => ({ ...ex })) : [],
+        gym: sourceData.exercises.gym ? sourceData.exercises.gym.map(ex => ({ ...ex })) : [],
       };
+      // Preserve current weight and dayType unless copying them too
+      // Only copy weight if source has one, otherwise keep current
+      if (sourceData.weight && sourceData.weight !== '') {
+        targetData.weight = sourceData.weight;
+      }
+      if (sourceData.dayType) {
+        targetData.dayType = sourceData.dayType;
+      }
       save();
       renderFitness();
     }
@@ -1567,12 +1595,10 @@ function buildDefaultRows(year, month) {
     load();
     updateHeaderDate();
     setInterval(updateHeaderDate, 60000);
-    renderCal();
-    renderTodoMonths();
     // Add 1 social row if none exist
     if (!state.socialRows.length) addSocialRow('bottom');
     else renderSocial();
-    renderApps();
+    renderFitness();
     
   </script>
 <script>
