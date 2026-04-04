@@ -736,27 +736,28 @@
     }
 
     /* ==================== STREAKS ==================== */
-    .streak-container {
-      display: flex;
-      gap: 16px;
-      flex: 1;
-      min-height: 0;
-      overflow-x: auto;
-      padding: 8px 0
-    }
+.streak-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: flex-start;
+  max-height: 50px;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 
-    .streak-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 120px;
-      align-items: center;
-      flex-shrink: 0
-    }
+.streak-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 6px;
+  display: flex;
+  gap: 4px;
+  min-width: 100px;
+  align-items: center;
+  flex-shrink: 0;
+}
 
     .streak-icon {
       font-size: 20px
@@ -932,11 +933,13 @@
             <span id="weightDelta" style="font-size:10px;margin-left:8px;color:var(--text3)"></span>
           </div>
           <div class="day-type-selector" id="dayTypeSelector"></div>
-          <button class="btn small pink" onclick="duplicateFromDate(prompt('Enter date (YYYY-MM-DD)'))">Duplicate From Date</button>
+          <button class="btn small pink" onclick="duplicateFromDate(prompt('Enter date (YYYY-MM-DD)'))">Duplicate From
+            Date</button>
           <button class="btn primary small" onclick="openAddExercise()">+ Exercise</button>
         </div>
         <div class="streak-container" id="streakContainer" style="flex:1;min-height:0;overflow-y:hidden"></div>
-        <div class="exercise-sections" id="exerciseSections" style="flex:1;min-height:0;overflow-y:auto;overflow-x:auto">
+        <div class="exercise-sections" id="exerciseSections"
+          style="flex:1;min-height:0;overflow-y:auto;overflow-x:auto">
           <div class="exercise-section">
             <div class="exercise-section-title" style="color:var(--accent)">🌅 Day Workout</div>
             <div id="exList_day"></div>
@@ -1031,35 +1034,35 @@
       document.getElementById('headerDate').textContent = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     }
     document.getElementById('loadJsonBtn').onclick = () => {
-  document.getElementById('jsonFileInput').click();
-};
+      document.getElementById('jsonFileInput').click();
+    };
 
-document.getElementById('jsonFileInput').onchange = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+    document.getElementById('jsonFileInput').onchange = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
 
-      // Replace state with loaded JSON
-      state = data;
+          // Replace state with loaded JSON
+          state = data;
 
-      // Save to localStorage
-      save();
+          // Save to localStorage
+          save();
 
-      // Re-render all tabs
-      renderSocial();
-      renderFitness();
+          // Re-render all tabs
+          renderSocial();
+          renderFitness();
 
-      alert('JSON loaded successfully!');
-    } catch (err) {
-      alert('Error parsing JSON: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-};
+          alert('JSON loaded successfully!');
+        } catch (err) {
+          alert('Error parsing JSON: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
 
     // ============================================================
     // TAB 1: CALENDAR
@@ -1264,68 +1267,68 @@ document.getElementById('jsonFileInput').onchange = (event) => {
     }
 
 
-function generateMonthDays(year, monthIndex) {
-  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  const totalDays = daysInMonth[monthIndex];
-  let html = '';
-  
-  for (let day = 1; day <= totalDays; day++) {
-    // Every 7 days, insert a "Week X Goal" row
-    if ((day - 1) % 7 === 0) {
-      const weekNum = Math.floor((day - 1) / 7) + 1;
-      html += `<div class="todo-day-row week-goal">Week ${weekNum} Goal</div>`;
+    function generateMonthDays(year, monthIndex) {
+      const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const totalDays = daysInMonth[monthIndex];
+      let html = '';
+
+      for (let day = 1; day <= totalDays; day++) {
+        // Every 7 days, insert a "Week X Goal" row
+        if ((day - 1) % 7 === 0) {
+          const weekNum = Math.floor((day - 1) / 7) + 1;
+          html += `<div class="todo-day-row week-goal">Week ${weekNum} Goal</div>`;
+        }
+        html += `<div class="todo-day-row">Day ${day}</div>`;
+      }
+      return html;
     }
-    html += `<div class="todo-day-row">Day ${day}</div>`;
-  }
-  return html;
-}
 
-function buildDefaultRows(year, month) {
-  const daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
-  const numDays = daysInMonth[month];
-  const rows = [];
+    function buildDefaultRows(year, month) {
+      const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const numDays = daysInMonth[month];
+      const rows = [];
 
-  for (let d = 1; d <= numDays; d++) {
-    rows.push({
-      label: d.toString(),   // ✅ keep DATE visible
-      cells: ['']
-    });
+      for (let d = 1; d <= numDays; d++) {
+        rows.push({
+          label: d.toString(),   // ✅ keep DATE visible
+          cells: ['']
+        });
 
-    // Week goal every 7 days
-    if (d % 7 === 0) {
+        // Week goal every 7 days
+        if (d % 7 === 0) {
+          rows.push({
+            label: `Week ${Math.ceil(d / 7)} Goal`,
+            cells: [''],
+            type: 'goal'
+          });
+        }
+      }
+
+      // ✅ ADD THESE BACK (this is what you lost)
+
+      // Month goal
       rows.push({
-        label: `Week ${Math.ceil(d / 7)} Goal`,
+        label: '📅 Month Goal',
         cells: [''],
         type: 'goal'
       });
+
+      // Quarter goal
+      rows.push({
+        label: `📊 Q${Math.floor(month / 3) + 1} Goal`,
+        cells: [''],
+        type: 'goal'
+      });
+
+      // Year goal
+      rows.push({
+        label: `🎯 Year ${year} Goal`,
+        cells: [''],
+        type: 'goal'
+      });
+
+      return rows;
     }
-  }
-
-  // ✅ ADD THESE BACK (this is what you lost)
-
-  // Month goal
-  rows.push({
-    label: '📅 Month Goal',
-    cells: [''],
-    type: 'goal'
-  });
-
-  // Quarter goal
-  rows.push({
-    label: `📊 Q${Math.floor(month / 3) + 1} Goal`,
-    cells: [''],
-    type: 'goal'
-  });
-
-  // Year goal
-  rows.push({
-    label: `🎯 Year ${year} Goal`,
-    cells: [''],
-    type: 'goal'
-  });
-
-  return rows;
-}
 
     function renderSheet() {
       const sheet = state.todoData[currentSheetKey];
@@ -1513,17 +1516,17 @@ function buildDefaultRows(year, month) {
       const k = getFitnessKey();
       const d = getFitnessDay();
       const currentData = state.fitness[k] || {};
-      
+
       // Calculate weight delta for current viewing date
       const prevDate = new Date(fitnessDate);
       prevDate.setDate(prevDate.getDate() - 1);
       const prevKey = fmtDate(prevDate);
       const prevData = state.fitness[prevKey] || {};
-      
+
       const currentWeight = parseFloat(currentData.weight) || 0;
       const prevWeight = parseFloat(prevData.weight) || 0;
       const delta = currentData.weight && prevData.weight ? (currentWeight - prevWeight) : 0;
-      
+
       const span = document.getElementById('weightDelta');
       span.textContent = delta > 0 ? `↑${delta.toFixed(1)}kg` : delta < 0 ? `↓${Math.abs(delta).toFixed(1)}kg` : '-';
       span.style.color = delta > 0 ? 'var(--danger)' : delta < 0 ? 'var(--success)' : 'var(--text3)';
@@ -1658,7 +1661,7 @@ function buildDefaultRows(year, month) {
 
       const targetKey = getFitnessKey();
       const targetData = getFitnessDay();
-      
+
       // Deep copy exercises to prevent reference sharing
       targetData.exercises = {
         day: sourceData.exercises.day ? sourceData.exercises.day.map(ex => ({ ...ex })) : [],
@@ -1792,59 +1795,59 @@ function buildDefaultRows(year, month) {
     if (!state.socialRows.length) addSocialRow('bottom');
     else renderSocial();
     renderFitness();
-    
+
   </script>
-<script>
-  // Ensure DOM is loaded
-  document.addEventListener('DOMContentLoaded', () => {
+  <script>
+    // Ensure DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
 
-    const btn = document.getElementById('saveCloudBtn');
-    if (!btn) return console.error('Save button not found');
+      const btn = document.getElementById('saveCloudBtn');
+      if (!btn) return console.error('Save button not found');
 
-    btn.addEventListener('click', () => {
-      try {
-        // Create a JSON blob of your app state
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+      btn.addEventListener('click', () => {
+        try {
+          // Create a JSON blob of your app state
+          const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
 
-        // Create a temporary <a> to trigger download
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'data.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+          // Create a temporary <a> to trigger download
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'data.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
 
-        // Cleanup
-        URL.revokeObjectURL(url);
+          // Cleanup
+          URL.revokeObjectURL(url);
 
-        alert('data.json generated! Save it in your repo folder for nightly backup.');
-      } catch (err) {
-        console.error('Error saving data:', err);
-        alert('Failed to save data. Check console.');
-      }
-    });
-
-    // Light mode toggle
-    const modeToggle = document.getElementById('modeToggle');
-    if (modeToggle) {
-      // Check localStorage for saved mode
-      const savedMode = localStorage.getItem('lifeOS_mode') || 'dark';
-      if (savedMode === 'light') {
-        document.documentElement.classList.add('light-mode');
-        modeToggle.textContent = '☀️ Light';
-      }
-
-      modeToggle.addEventListener('click', () => {
-        document.documentElement.classList.toggle('light-mode');
-        const isLight = document.documentElement.classList.contains('light-mode');
-        localStorage.setItem('lifeOS_mode', isLight ? 'light' : 'dark');
-        modeToggle.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+          alert('data.json generated! Save it in your repo folder for nightly backup.');
+        } catch (err) {
+          console.error('Error saving data:', err);
+          alert('Failed to save data. Check console.');
+        }
       });
-    }
 
-  });
-</script>
+      // Light mode toggle
+      const modeToggle = document.getElementById('modeToggle');
+      if (modeToggle) {
+        // Check localStorage for saved mode
+        const savedMode = localStorage.getItem('lifeOS_mode') || 'dark';
+        if (savedMode === 'light') {
+          document.documentElement.classList.add('light-mode');
+          modeToggle.textContent = '☀️ Light';
+        }
+
+        modeToggle.addEventListener('click', () => {
+          document.documentElement.classList.toggle('light-mode');
+          const isLight = document.documentElement.classList.contains('light-mode');
+          localStorage.setItem('lifeOS_mode', isLight ? 'light' : 'dark');
+          modeToggle.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+        });
+      }
+
+    });
+  </script>
 </body>
 
 </html>
