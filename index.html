@@ -380,302 +380,7 @@
       border: 1px solid
     }
 
-    /* ==================== TAB 1: CALENDAR ==================== */
-    .cal-header {
-      display: flex;
-      align-items: center;
-      gap: 12px
-    }
-
-    .cal-header h2 {
-      font-size: 20px;
-      font-weight: 800;
-      font-family: var(--sans)
-    }
-
-    .cal-nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: auto
-    }
-
-    .cal-body {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 0;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      flex: 1;
-      min-height: 0
-    }
-
-    .cal-time-col {
-      background: var(--surface);
-      border-right: 1px solid var(--border)
-    }
-
-    .cal-time-slot {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 10px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text3);
-      border-bottom: 1px solid var(--border)
-    }
-
-    .cal-events-col {
-      position: relative;
-      overflow-y: auto;
-      background: var(--surface)
-    }
-
-    .cal-event-row {
-      height: 48px;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      cursor: pointer;
-      transition: background 0.1s
-    }
-
-    .cal-event-row:hover {
-      background: var(--surface2)
-    }
-
-    .cal-event {
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 11px;
-      font-family: var(--mono);
-      cursor: pointer;
-      z-index: 10;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: space-between
-    }
-
-    .cal-event .del-btn {
-      opacity: 0;
-      font-size: 9px;
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      padding: 0 2px
-    }
-
-    .cal-event:hover .del-btn {
-      opacity: 1
-    }
-
-    .cal-now-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent2);
-      z-index: 20;
-      pointer-events: none
-    }
-
-    .cal-now-line::before {
-      content: '';
-      position: absolute;
-      left: -4px;
-      top: -4px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent2)
-    }
-
-    .cal-week-grid {
-      display: grid;
-      grid-template-columns: 80px repeat(7, 1fr);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      flex: 1;
-      min-height: 0;
-      gap: 0
-    }
-
-    .cal-week-day-header {
-      background: var(--surface2);
-      padding: 8px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--text3)
-    }
-
-    .cal-week-day-header.today {
-      color: var(--accent)
-    }
-
-    .cal-mode-toggle {
-      display: flex;
-      gap: 4px
-    }
-
-    .cal-mode-btn {
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      background: none;
-      color: var(--text3);
-      cursor: pointer;
-      border-radius: 3px
-    }
-
-    .cal-mode-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff
-    }
-
-    /* ==================== TAB 2: TODO ==================== */
-    .months-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 10px
-    }
-
-    .month-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 14px;
-      cursor: pointer;
-      transition: all 0.15s;
-      position: relative;
-      overflow: hidden
-    }
-
-    .month-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent2)
-    }
-
-    .month-card:hover {
-      border-color: var(--accent2);
-      transform: translateY(-2px)
-    }
-
-    .month-card h3 {
-      font-size: 14px;
-      font-weight: 800;
-      margin-bottom: 4px
-    }
-
-    .month-card span {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text3)
-    }
-
-    .todo-sheet {
-      overflow-x: auto;
-      flex: 1
-    }
-
-    .todo-table {
-      border-collapse: collapse;
-      width: 100%;
-      font-family: var(--mono);
-      font-size: 11px;
-      min-width: 900px
-    }
-
-    .todo-table th {
-      background: var(--surface2);
-      color: var(--text3);
-      padding: 8px 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      font-size: 10px
-    }
-
-    .todo-table td {
-      border: 1px solid var(--border);
-      padding: 4px 6px;
-      vertical-align: top;
-      background: var(--surface)
-    }
-
-    .todo-table tr:hover td {
-      background: var(--surface2)
-    }
-
-    .todo-cell-input {
-      width: 100%;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 11px;
-      resize: none;
-      min-height: 24px;
-      outline: none;
-      line-height: 1.4
-    }
-
-    .todo-day-label {
-      color: var(--text3);
-      font-size: 10px;
-      margin-bottom: 2px
-    }
-
-    .goal-row td {
-      background: rgba(124, 106, 255, 0.08) !important
-    }
-
-    .goal-row td:first-child {
-      color: var(--accent);
-      font-weight: 700
-    }
-
-    .back-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      color: var(--text3);
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      background: none;
-      border: none;
-      padding: 0 0 4px 0;
-      transition: color 0.15s
-    }
-
-    .back-btn:hover {
-      color: var(--text)
-    }
-
-    /* ==================== TAB 3: SOCIAL ==================== */
+    /* ==================== TAB 1: SOCIAL ==================== */
     .social-table-wrap {
       overflow-x: auto;
       flex: 1
@@ -798,7 +503,7 @@
       white-space: nowrap
     }
 
-    /* ==================== TAB 4: FITNESS ==================== */
+    /* ==================== TAB 2: FITNESS ==================== */
     .fitness-top {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -980,124 +685,6 @@
       flex-wrap: wrap
     }
 
-    .filter-pill {
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 3px 10px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: none;
-      color: var(--text3);
-      cursor: pointer;
-      transition: all 0.15s
-    }
-
-    .filter-pill.active {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(124, 106, 255, 0.12)
-    }
-
-    .apps-table-wrap {
-      overflow-x: auto;
-      flex: 1
-    }
-
-    .apps-table {
-      border-collapse: collapse;
-      width: 100%;
-      min-width: 900px;
-      font-family: var(--mono);
-      font-size: 11px
-    }
-
-    .apps-table th {
-      background: var(--surface2);
-      color: var(--text3);
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-size: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 5
-    }
-
-    .apps-table td {
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      background: var(--surface);
-      vertical-align: middle
-    }
-
-    .apps-table tr:hover td {
-      background: var(--surface2)
-    }
-
-    .apps-input {
-      width: 100%;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 11px;
-      outline: none
-    }
-
-    .status-badge {
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      border: 1px solid;
-      white-space: nowrap
-    }
-
-    .status-idea {
-      border-color: var(--text3);
-      color: var(--text3)
-    }
-
-    .status-planning {
-      border-color: var(--accent4);
-      color: var(--accent4)
-    }
-
-    .status-building {
-      border-color: var(--accent);
-      color: var(--accent)
-    }
-
-    .status-launched {
-      border-color: var(--accent3);
-      color: var(--accent3)
-    }
-
-    .status-paused {
-      border-color: var(--accent2);
-      color: var(--accent2)
-    }
-
-    .status-cancelled {
-      border-color: var(--danger);
-      color: var(--danger)
-    }
-
-    .type-badge {
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      white-space: nowrap
-    }
-
-    .deadline-input {
-      width: 120px
-    }
-
     /* EMPTY STATE */
     .empty {
       text-align: center;
@@ -1144,56 +731,14 @@
     </div>
 
     <div class="nav">
-      <button class="nav-tab active" onclick="switchTab(0)">📅 Calendar</button>
-      <button class="nav-tab" onclick="switchTab(1)">📋 Monthly Todo</button>
-      <button class="nav-tab" onclick="switchTab(2)">📱 Social Tracker</button>
-      <button class="nav-tab" onclick="switchTab(3)">💪 Fitness</button>
-      <button class="nav-tab" onclick="switchTab(4)">🚀 App Dev</button>
+      <button class="nav-tab active" onclick="switchTab(0)">� Social Tracker</button>
+      <button class="nav-tab" onclick="switchTab(1)">💪 Fitness</button>
     </div>
 
     <div class="content">
 
-      <!-- ========== TAB 1: CALENDAR ========== -->
+      <!-- ========== TAB 1: SOCIAL TRACKER ========== -->
       <div class="tab-panel active" id="tab0">
-        <div class="cal-header">
-          <div class="cal-mode-toggle">
-            <button class="cal-mode-btn active" id="dayModeBtn" onclick="setCalMode('day')">Day</button>
-            <button class="cal-mode-btn" id="weekModeBtn" onclick="setCalMode('week')">Week</button>
-          </div>
-          <h2 id="calTitle"></h2>
-          <div class="cal-nav">
-            <button class="btn small" onclick="calNav(-1)">‹ Prev</button>
-            <button class="btn small" onclick="calNavToday()">Today</button>
-            <button class="btn small" onclick="calNav(1)">Next ›</button>
-            <button class="btn primary small" onclick="openAddEvent()">+ Event</button>
-          </div>
-        </div>
-        <div id="calContainer" style="flex:1;min-height:0;overflow-y:auto"></div>
-      </div>
-
-      <!-- ========== TAB 2: MONTHLY TODO ========== -->
-      <div class="tab-panel" id="tab1">
-        <div id="todoView">
-          <div class="section-header">
-            <div class="section-title">Monthly Planner</div>
-            <span class="pill" style="border-color:var(--accent2);color:var(--accent2)" id="yearLabel"></span>
-          </div>
-          <div class="months-grid" id="monthsGrid"></div>
-        </div>
-        <div id="sheetView" style="display:none;flex:1;flex-direction:column;gap:12px">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div id="monthDaysGrid"></div>
-            <button class="back-btn" onclick="closeSheet()">← Back</button>
-            <span class="section-title" id="sheetTitle"></span>
-          </div>
-          <div id="todoTableContainer" style="max-height: 500px; overflow-y: auto;">
-            <table id="todoTable" style="border-collapse: collapse; width: 100%;"></table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========== TAB 3: SOCIAL TRACKER ========== -->
-      <div class="tab-panel" id="tab2">
         <div class="section-header">
           <div class="section-title">Social Media Tracker</div>
           <button class="btn primary small" onclick="addSocialRow('top')">+ Row Top</button>
@@ -1219,8 +764,8 @@
         </div>
       </div>
 
-      <!-- ========== TAB 4: FITNESS ========== -->
-      <div class="tab-panel" id="tab3">
+      <!-- ========== TAB 2: FITNESS ========== -->
+      <div class="tab-panel" id="tab1">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
           <div class="fitness-date-nav">
             <button class="btn small" onclick="fitnessNav(-1)">‹</button>
@@ -1255,33 +800,6 @@
             <div id="exList_gym"></div>
             <button class="btn small" onclick="openAddExercise('gym')">+ Add</button>
           </div>
-        </div>
-      </div>
-
-      <!-- ========== TAB 5: APP DEV ========== -->
-      <div class="tab-panel" id="tab4">
-        <div class="apps-controls">
-          <input class="search-input" type="text" placeholder="Search apps..." oninput="filterApps(this.value)"
-            id="appSearch">
-          <div class="status-filter" id="statusFilter"></div>
-          <button class="btn primary small" onclick="openAddApp()" style="margin-left:auto">+ New App</button>
-        </div>
-        <div class="apps-table-wrap">
-          <table class="apps-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th style="min-width:140px">App Name / Idea</th>
-                <th style="min-width:200px">Short Description</th>
-                <th style="min-width:100px">Status</th>
-                <th style="min-width:100px">Type</th>
-                <th style="min-width:200px">Additional Info</th>
-                <th style="min-width:110px">Deadline</th>
-                <th style="width:60px">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="appsBody"></tbody>
-          </table>
         </div>
       </div>
 
@@ -1351,11 +869,8 @@
       document.querySelectorAll('.tab-panel').forEach((p, j) => p.classList.toggle('active', j === i));
       document.querySelectorAll('.nav-tab').forEach((b, j) => b.classList.toggle('active', j === i));
       currentTab = i;
-      if (i === 0) renderCal();
-      if (i === 1) renderTodoMonths();
-      if (i === 2) renderSocial();
-      if (i === 3) renderFitness();
-      if (i === 4) renderApps();
+      if (i === 0) renderSocial();
+      if (i === 1) renderFitness();
     }
 
     // Header date
@@ -1383,11 +898,8 @@ document.getElementById('jsonFileInput').onchange = (event) => {
       save();
 
       // Re-render all tabs
-      renderCal();
-      renderTodoMonths();
       renderSocial();
       renderFitness();
-      renderApps();
 
       alert('JSON loaded successfully!');
     } catch (err) {
